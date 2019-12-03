@@ -1,5 +1,6 @@
 package com.example.movie_nights_rest.handler;
 
+import com.example.movie_nights_rest.command.user.UserResponseCommand;
 import com.example.movie_nights_rest.model.User;
 import com.example.movie_nights_rest.repository.UserRepository;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,9 @@ public class UserHandler {
     }
 
     public Mono listUsers(ServerRequest request) {
-        return ServerResponse.ok().body(userRepository.findAll(), User.class);
+        return ServerResponse.ok().body(
+                userRepository.findAll().map(UserResponseCommand::new), UserResponseCommand.class
+        );
     }
 
 }

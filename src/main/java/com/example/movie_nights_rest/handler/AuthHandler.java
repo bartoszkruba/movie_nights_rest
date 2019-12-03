@@ -36,6 +36,7 @@ public class AuthHandler {
         return loginRequest.flatMap(login -> userRepository.findByUsername(login.getUsername())
                 .flatMap(user -> {
                     if (bCryptPasswordEncoder.matches(login.getPassword(), user.getPassword())) {
+
                         return ServerResponse.ok()
                                 .contentType(APPLICATION_JSON)
                                 .body(BodyInserters.fromValue(new LoginResponse(jwtTokenUtil.generateToken(user))));
