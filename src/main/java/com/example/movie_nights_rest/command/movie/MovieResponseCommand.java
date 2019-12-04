@@ -4,11 +4,11 @@ package com.example.movie_nights_rest.command.movie;
 import com.example.movie_nights_rest.model.Movie;
 import com.example.movie_nights_rest.model.Rating;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 
 import java.util.ArrayList;
 
@@ -19,8 +19,30 @@ import java.util.ArrayList;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MovieResponseCommand {
 
+    public MovieResponseCommand(OmdbMovieResponseCommand movie) {
 
-    public MovieResponseCommand(Movie movie) {
+        this.imdbID = movie.getImdbID();
+        this.year = movie.getYear();
+        this.rated = movie.getRated();
+        this.released = movie.getReleased();
+        this.runtime = movie.getRuntime();
+        this.genre = movie.getGenre();
+        this.director = movie.getDirector();
+        this.writer = movie.getWriter();
+        this.actors = movie.getActors();
+        this.plot = movie.getPlot();
+        this.language = movie.getLanguage();
+        this.country = movie.getCountry();
+        this.imdbRating = movie.getImdbRating();
+        this.imdbVotes = movie.getImdbVotes();
+        this.type = movie.getType();
+        this.dvd = movie.getDvd();
+        this.boxOffice = movie.getBoxOffice();
+        this.production = movie.getProduction();
+        this.website = movie.getWebsite();
+    }
+
+    public MovieResponseCommand(Movie movie, String plot) {
 
         this.imdbID = movie.getImdbID();
         this.year = movie.getYear();
@@ -32,10 +54,10 @@ public class MovieResponseCommand {
         this.writer = movie.getWriter();
         this.actors = movie.getActors();
 
-        // TODO: 2019-12-04 get plot
+        if (plot != null && plot.equals("short")) this.plot = movie.getShortPlot();
+        else if (plot != null) this.plot = movie.getLongPlot();
 
         this.language = movie.getLanguage();
-
         this.country = movie.getCountry();
         this.imdbRating = movie.getImdbRating();
         this.imdbVotes = movie.getImdbVotes();

@@ -1,5 +1,7 @@
 package com.example.movie_nights_rest.model;
 
+import com.example.movie_nights_rest.command.movie.OmdbMovieResponseCommand;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +18,34 @@ import java.util.ArrayList;
 @Document
 @Builder
 public class Movie {
+
+    public Movie(OmdbMovieResponseCommand movie, String plot) {
+        this.imdbID = movie.getImdbID();
+        this.year = movie.getYear();
+        this.rated = movie.getRated();
+        this.released = movie.getReleased();
+        this.runtime = movie.getRuntime();
+        this.genre = movie.getGenre();
+        this.director = movie.getDirector();
+        this.writer = movie.getWriter();
+        this.actors = movie.getActors();
+
+        if (plot.equals("short")) this.shortPlot = movie.getPlot();
+        else this.longPlot = movie.getPlot();
+
+        this.language = movie.getLanguage();
+
+        this.country = movie.getCountry();
+        this.imdbRating = movie.getImdbRating();
+        this.imdbVotes = movie.getImdbVotes();
+        this.type = movie.getType();
+        this.dvd = movie.getDvd();
+        this.boxOffice = movie.getBoxOffice();
+        this.production = movie.getProduction();
+        this.website = movie.getWebsite();
+    }
+
+    private String title;
 
     @Id
     private String imdbID;

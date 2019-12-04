@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/movie")
@@ -24,7 +25,7 @@ public class MovieController {
 
     @GetMapping
     @ApiOperation("Fetch movies. Available for registered users.")
-    public Flux<MovieResponseCommand> fetchMovies(
+    public Mono<MovieResponseCommand> fetchMovie(
             @ApiParam(value = "IMDB ID")
             @RequestParam(required = false, value = "i")
                     String id,
@@ -38,9 +39,9 @@ public class MovieController {
             @RequestParam(required = false, value = "y")
                     String year,
             @ApiParam(value = "Return short or full plot (short, full)")
-            @RequestParam(required = false)
+            @RequestParam(defaultValue = "short")
                     String plot
     ) {
-        return movieService.fetchMovies(id, title, type, year, plot);
+        return movieService.fetchMovie(id, title, type, year, plot);
     }
 }
