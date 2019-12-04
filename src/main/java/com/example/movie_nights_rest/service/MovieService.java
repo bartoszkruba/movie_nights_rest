@@ -8,6 +8,7 @@ import exception.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -20,13 +21,13 @@ public class MovieService {
         this.movieRepository = movieRepository;
     }
 
-    public Mono<MovieResponseCommand> fetchMovie(String id, String title, String type, String year, String plot) {
-        if (id != null) return movieRepository.findById(id).map(movie -> new MovieResponseCommand(movie, plot))
+    public Flux<MovieResponseCommand> fetchMovie(String id, String title, String type, String year, String plot) {
+        if (id != null) return movieRepository.findById(id).map(movie -> new MovieResponseCommand(movie, plot)).flux()
                 .switchIfEmpty(fetchFromOMDB(id, title, type, year, plot));
         else return fetchFromOMDB(id, title, type, year, plot);
     }
 
-    private Mono<MovieResponseCommand> fetchFromOMDB(String id, String title, String type, String year, String plot) {
+    private Flux<MovieResponseCommand> fetchFromOMDB(String id, String title, String type, String year, String plot) {
 
         var uri = UriComponentsBuilder.newInstance()
                 .scheme("http").host("www.omdbapi.com")
@@ -47,7 +48,7 @@ public class MovieService {
                 .get()
                 .uri(uri.toUriString())
                 .retrieve()
-                .bodyToMono(OmdbMovieResponseCommand.class)
+                .bodyToFlux(OmdbMovieResponseCommand.class)
                 .map(movie -> {
                             saveMovieToDatabase(id).subscribe();
                             return new MovieResponseCommand(movie);
@@ -55,7 +56,7 @@ public class MovieService {
                 );
     }
 
-    public Mono<Void> saveMovieToDatabase(String id) {
+    private Mono<Void> saveMovieToDatabase(String id) {
         var uri = UriComponentsBuilder.newInstance()
                 .scheme("http").host("www.omdbapi.com")
                 .path("/")
