@@ -8,6 +8,7 @@ import com.example.movie_nights_rest.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,7 @@ public class UserController {
 
     @PostMapping
     @ApiOperation("Create new user. Available for all users.")
+    @ResponseStatus(HttpStatus.CREATED)
     public Mono<UserResponseCommand> create(
             @Valid
             @RequestBody
