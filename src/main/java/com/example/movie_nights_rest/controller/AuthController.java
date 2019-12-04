@@ -3,11 +3,17 @@ package com.example.movie_nights_rest.controller;
 import com.example.movie_nights_rest.command.auth.LoginRequest;
 import com.example.movie_nights_rest.command.auth.LoginResponse;
 import com.example.movie_nights_rest.service.AuthService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
+
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
+@Api("Endpoints for authentication.")
 public class AuthController {
 
     private final AuthService authService;
@@ -17,7 +23,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public Mono<LoginResponse> login(@RequestBody Mono<LoginRequest> request) {
+    @ApiOperation("Login to your account")
+    public Mono<LoginResponse> login(
+            @Valid
+            @RequestBody
+            @ApiParam("Login information")
+                    Mono<LoginRequest> request) {
         return authService.login(request);
     }
 }
