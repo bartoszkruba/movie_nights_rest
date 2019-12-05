@@ -2,6 +2,7 @@ package com.example.movie_nights_rest.service;
 
 import com.example.movie_nights_rest.command.movie.MovieResponseCommand;
 import com.example.movie_nights_rest.command.movie.OmdbMovieResponseCommand;
+import com.example.movie_nights_rest.command.movie.OmdbMovieShortResponseCommand;
 import com.example.movie_nights_rest.command.movie.OmdbSearchPageCommand;
 import com.example.movie_nights_rest.model.Movie;
 import com.example.movie_nights_rest.repository.MovieRepository;
@@ -12,6 +13,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,27 +44,32 @@ public class MovieService {
                 .scheme("http").host("www.omdbapi.com")
                 .path("/")
                 .queryParam("apikey", API_KEY);
-        if (title != null) uri.queryParam("s", title);
+        if (title != null) uri.queryParam("s", URLDecoder.decode(title));
         if (type != null) uri.queryParam("type", type);
         if (year != null) uri.queryParam("y", year);
         if (page != null) uri.queryParam("page", page);
 
         uri.buildAndExpand();
 
-        return WebClient.create()
-                .get()
-                .uri(uri.toUriString())
-                .retrieve()
-                .bodyToMono(OmdbSearchPageCommand.class)
-                .map(OmdbSearchPageCommand::getSearch)
-                .map(search -> search.stream()
-                        .map(movie -> fetchMovie(movie.getImdbID()))
-                        .collect(Collectors.toList()))
-                .flatMapMany(Flux::mergeSequential);
+        try {
+            return WebClient.create()
+                    .get()
+                    .uri(new URI(uri.toUriString()))
+                    .retrieve()
+                    .bodyToMono(OmdbSearchPageCommand.class)
+                    .log("DSSDDSSDSD")
+                    .map(OmdbSearchPageCommand::getSearch)
+                    .flux()
+                    .flatMap(Flux::fromIterable)
+                    .concatMap(movie -> fetchMovie(movie.getImdbID()));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        return Flux.empty();
     }
 
     private Mono<MovieResponseCommand> fetchFromOMDB(String id, String title, String type, String year, String plot) {
-
         var uri = UriComponentsBuilder.newInstance()
                 .scheme("http").host("www.omdbapi.com")
                 .path("/")
