@@ -21,6 +21,7 @@ public class MovieResponseCommand {
 
     public MovieResponseCommand(OmdbMovieResponseCommand movie) {
 
+        this.title = movie.getTitle();
         this.imdbID = movie.getImdbID();
         this.year = movie.getYear();
         this.rated = movie.getRated();
@@ -44,6 +45,7 @@ public class MovieResponseCommand {
 
     public MovieResponseCommand(Movie movie, String plot) {
 
+        this.title = movie.getTitle();
         this.imdbID = movie.getImdbID();
         this.year = movie.getYear();
         this.rated = movie.getRated();
@@ -67,6 +69,8 @@ public class MovieResponseCommand {
         this.production = movie.getProduction();
         this.website = movie.getWebsite();
     }
+
+    private String title;
 
     private String imdbID;
 
