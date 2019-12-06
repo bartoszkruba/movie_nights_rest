@@ -20,6 +20,6 @@ public class UserBootstrap implements CommandLineRunner {
     public void run(String... args) throws Exception {
         var roles = new ArrayList<String>();
         roles.add(Role.ADMIN);
-        userService.create("admin", "password", roles).subscribe();
+        userService.create("admin", "password", roles);
     }
 }

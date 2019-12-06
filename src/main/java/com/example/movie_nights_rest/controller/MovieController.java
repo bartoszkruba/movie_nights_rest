@@ -1,5 +1,6 @@
 package com.example.movie_nights_rest.controller;
 
+import com.example.movie_nights_rest.command.movie.MoviePageResponseCommand;
 import com.example.movie_nights_rest.command.movie.MovieResponseCommand;
 import com.example.movie_nights_rest.model.Role;
 import com.example.movie_nights_rest.service.MovieService;
@@ -8,8 +9,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+
+import java.net.URISyntaxException;
 
 @RestController
 @RequestMapping("/api/movie")
@@ -25,7 +26,7 @@ public class MovieController {
     @GetMapping("/{id}")
     @ApiOperation("Find movie by id. Available for registered users.")
     @PreAuthorize("hasRole('" + Role.BASIC + "') or hasRole('" + Role.ADMIN + "')")
-    public Mono<MovieResponseCommand> fetchMovie(
+    public MovieResponseCommand fetchMovie(
             @ApiParam(value = "IMDB ID")
             @PathVariable
                     String id,
@@ -38,7 +39,7 @@ public class MovieController {
     @GetMapping("/single")
     @ApiOperation("Fetch movies. Available for registered users.")
     @PreAuthorize("hasRole('" + Role.BASIC + "') or hasRole('" + Role.ADMIN + "')")
-    public Mono<MovieResponseCommand> fetchMovie(
+    public MovieResponseCommand fetchMovie(
             @ApiParam(value = "Movie title")
             @RequestParam
                     String title,
@@ -58,7 +59,7 @@ public class MovieController {
     @GetMapping("/many")
     @ApiOperation("Fetch movie page. Available for registered users.")
 //    @PreAuthorize("hasRole('" + Role.BASIC + "') or hasRole('" + Role.ADMIN + "')")
-    public Flux<MovieResponseCommand> fetchMovies(
+    public MoviePageResponseCommand fetchMovies(
             @ApiParam(value = "Move title")
             @RequestParam(required = false)
                     String title,
@@ -71,7 +72,7 @@ public class MovieController {
             @ApiParam("Page number")
             @RequestParam(defaultValue = "1")
                     Integer page
-    ) {
+    ) throws URISyntaxException {
         return movieService.fetchMoviePage(title, type, year, page);
     }
 }

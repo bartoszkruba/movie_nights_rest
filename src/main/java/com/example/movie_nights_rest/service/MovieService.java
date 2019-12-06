@@ -1,23 +1,21 @@
 package com.example.movie_nights_rest.service;
 
+import com.example.movie_nights_rest.command.movie.MoviePageResponseCommand;
 import com.example.movie_nights_rest.command.movie.MovieResponseCommand;
 import com.example.movie_nights_rest.command.movie.OmdbMovieResponseCommand;
-import com.example.movie_nights_rest.command.movie.OmdbMovieShortResponseCommand;
 import com.example.movie_nights_rest.command.movie.OmdbSearchPageCommand;
+import com.example.movie_nights_rest.exception.UnauthorizedException;
 import com.example.movie_nights_rest.model.Movie;
 import com.example.movie_nights_rest.repository.MovieRepository;
-import exception.BadRequestException;
+import com.example.movie_nights_rest.exception.BadRequestException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 @Service
 public class MovieService {
@@ -29,17 +27,27 @@ public class MovieService {
         this.movieRepository = movieRepository;
     }
 
-    public Mono<MovieResponseCommand> fetchMovie(String id, String title, String type, String year, String plot) {
-        if (id != null) return movieRepository.findById(id).map(movie -> new MovieResponseCommand(movie, plot))
-                .switchIfEmpty(fetchFromOMDB(id, title, type, year, plot));
-        else return fetchFromOMDB(id, title, type, year, plot);
+    public MovieResponseCommand fetchMovie(String id, String title, String type, String year, String plot) {
+
+        var local = movieRepository.findById(id);
+
+        return local.map(movie -> new MovieResponseCommand(movie, plot))
+                .orElseGet(() -> {
+                    try {
+                        return fetchFromOMDB(id, title, type, year, plot);
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                });
     }
 
-    private Mono<MovieResponseCommand> fetchMovie(String id) {
+    private MovieResponseCommand fetchMovie(String id) {
         return fetchMovie(id, null, null, null, null);
     }
 
-    public Flux<MovieResponseCommand> fetchMoviePage(String title, String type, String year, Integer page) {
+    public MoviePageResponseCommand fetchMoviePage(String title, String type, String year, Integer page)
+            throws URISyntaxException {
         var uri = UriComponentsBuilder.newInstance()
                 .scheme("http").host("www.omdbapi.com")
                 .path("/")
@@ -51,25 +59,19 @@ public class MovieService {
 
         uri.buildAndExpand();
 
-        try {
-            return WebClient.create()
-                    .get()
-                    .uri(new URI(uri.toUriString()))
-                    .retrieve()
-                    .bodyToMono(OmdbSearchPageCommand.class)
-                    .log("DSSDDSSDSD")
-                    .map(OmdbSearchPageCommand::getSearch)
-                    .flux()
-                    .flatMap(Flux::fromIterable)
-                    .concatMap(movie -> fetchMovie(movie.getImdbID()));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        var response = new RestTemplate().getForEntity(new URI(uri.toUriString()), OmdbSearchPageCommand.class).getBody();
+        if (response == null) throw new BadRequestException();
+        var movies = response.getSearch().stream().map(movie -> fetchMovie(movie.getImdbID()));
 
-        return Flux.empty();
+        var moviePage = new MoviePageResponseCommand();
+        moviePage.setTotalMovies(response.getTotalResults());
+        movies.forEach(movie -> moviePage.getMovies().add(movie));
+
+        return moviePage;
     }
 
-    private Mono<MovieResponseCommand> fetchFromOMDB(String id, String title, String type, String year, String plot) {
+    private MovieResponseCommand fetchFromOMDB(String id, String title, String type, String year, String plot)
+            throws URISyntaxException {
         var uri = UriComponentsBuilder.newInstance()
                 .scheme("http").host("www.omdbapi.com")
                 .path("/")
@@ -85,19 +87,21 @@ public class MovieService {
 
         uri.buildAndExpand();
 
-        return WebClient.create()
-                .get()
-                .uri(uri.toUriString())
-                .retrieve()
-                .bodyToMono(OmdbMovieResponseCommand.class)
-                .map(movie -> {
-                            saveMovieToDatabase(id).subscribe();
-                            return new MovieResponseCommand(movie);
-                        }
-                );
+        var movie = new RestTemplate().getForEntity(uri.toUriString(), OmdbMovieResponseCommand.class).getBody();
+
+        if (movie == null) return null;
+        saveMovieIfNotExist(id);
+
+        return new MovieResponseCommand(movie);
     }
 
-    private Mono<Void> saveMovieToDatabase(String id) {
+    @Async
+    void saveMovieIfNotExist(String id) throws URISyntaxException {
+        if (movieRepository.findById(id).isEmpty()) saveMovieToDatabase(id);
+
+    }
+
+    private void saveMovieToDatabase(String id) throws URISyntaxException {
         var uri = UriComponentsBuilder.newInstance()
                 .scheme("http").host("www.omdbapi.com")
                 .path("/")
@@ -105,25 +109,25 @@ public class MovieService {
         uri.queryParam("i", id);
         uri.buildAndExpand();
 
-        return WebClient.create()
-                .get()
-                .uri(uri.toUriString())
-                .retrieve()
-                .bodyToMono(OmdbMovieResponseCommand.class)
-                .map(movie -> {
-                    var fullPlotUri = UriComponentsBuilder.newInstance()
-                            .scheme("http").host("www.omdbapi.com")
-                            .path("/")
-                            .queryParam("apikey", API_KEY);
-                    uri.queryParam("i", id);
-                    uri.queryParam("plot", "full");
-                    uri.buildAndExpand();
-                    return WebClient.create().get().uri(fullPlotUri.toUriString()).retrieve()
-                            .bodyToMono(OmdbMovieResponseCommand.class).map(fullPlotMovie -> {
-                                var toSave = new Movie(movie, "short");
-                                toSave.setLongPlot(fullPlotMovie.getPlot());
-                                return movieRepository.save(toSave);
-                            }).subscribe();
-                }).then();
+        var fetched = new RestTemplate().getForEntity(new URI(uri.toUriString()), OmdbMovieResponseCommand.class)
+                .getBody();
+
+        if (fetched == null) throw new UnauthorizedException();
+        Movie toSave = new Movie(fetched, "short");
+
+        var fullPlotUri = UriComponentsBuilder.newInstance()
+                .scheme("http").host("www.omdbapi.com")
+                .path("/")
+                .queryParam("apikey", API_KEY);
+        uri.queryParam("i", id);
+        uri.queryParam("plot", "full");
+        uri.buildAndExpand();
+
+        fetched = new RestTemplate().getForEntity(new URI(fullPlotUri.toUriString()), OmdbMovieResponseCommand.class)
+                .getBody();
+
+        toSave.setLongPlot(fetched.getPlot());
+
+        movieRepository.save(toSave);
     }
 }

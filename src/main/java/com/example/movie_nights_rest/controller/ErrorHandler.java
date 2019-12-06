@@ -1,44 +1,38 @@
 package com.example.movie_nights_rest.controller;
 
-import org.springframework.boot.autoconfigure.web.ResourceProperties;
-import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
-import org.springframework.boot.web.reactive.error.ErrorAttributes;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.Order;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerCodecConfigurer;
-import org.springframework.stereotype.Component;
-import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.server.*;
-import reactor.core.publisher.Mono;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-@Component
-@Order(-2)
-public class ErrorHandler extends AbstractErrorWebExceptionHandler {
-
-    public ErrorHandler(ErrorAttributes errorAttributes, ResourceProperties resourceProperties,
-                        ApplicationContext applicationContext, ServerCodecConfigurer serverCodecConfigurer) {
-        super(errorAttributes, resourceProperties, applicationContext);
-        this.setMessageWriters(serverCodecConfigurer.getWriters());
-    }
+@ControllerAdvice
+public class ErrorHandler extends ResponseEntityExceptionHandler {
 
     @Override
-    protected RouterFunction<ServerResponse> getRoutingFunction(ErrorAttributes errorAttributes) {
-        return RouterFunctions.route(RequestPredicates.all(), this::renderErrorResponse);
-    }
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+                                                                  HttpHeaders headers,
+                                                                  HttpStatus status, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", new Date());
+        body.put("status", status.value());
 
-    private Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
+        Map<String, List<String>> errors = new HashMap<>();
 
-        Map<String, Object> errorPropertiesMap = getErrorAttributes(request, false);
+        ex.getBindingResult().getFieldErrors().forEach(x -> {
+            String name = x.getField();
+            var list = errors.getOrDefault(name, new ArrayList<>());
+            list.add(x.getDefaultMessage());
+            errors.put(name, list);
+        });
 
-        return ServerResponse.status(HttpStatus.BAD_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(errorPropertiesMap));
+        body.put("errors", errors);
+
+        return new ResponseEntity<>(body, headers, status);
     }
 }

@@ -5,10 +5,9 @@ import com.example.movie_nights_rest.model.User;
 import com.example.movie_nights_rest.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -22,16 +21,16 @@ public class UserService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    public Flux<UserResponseCommand> getAll() {
-        return userRepository.findAll().map(UserResponseCommand::new);
+    public Iterable<UserResponseCommand> getAll() {
+        return userRepository.findAll().stream().map(UserResponseCommand::new).collect(Collectors.toList());
     }
 
-    public Mono<UserResponseCommand> create(String username, String password, ArrayList<String> roles) {
+    public UserResponseCommand create(String username, String password, ArrayList<String> roles) {
         var user = User.builder()
                 .username(username)
                 .password(bCryptPasswordEncoder.encode(password))
                 .roles(roles).build();
 
-        return userRepository.save(user).map(UserResponseCommand::new);
+        return new UserResponseCommand(userRepository.save(user));
     }
 }

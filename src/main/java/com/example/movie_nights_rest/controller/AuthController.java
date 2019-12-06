@@ -7,7 +7,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 
@@ -24,11 +23,11 @@ public class AuthController {
 
     @PostMapping("/login")
     @ApiOperation("Login to your account")
-    public Mono<LoginResponse> login(
+    public LoginResponse login(
             @Valid
             @RequestBody
             @ApiParam("Login information")
-                    Mono<LoginRequest> request) {
+                    LoginRequest request) {
         return authService.login(request);
     }
 }

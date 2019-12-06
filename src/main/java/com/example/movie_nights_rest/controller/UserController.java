@@ -1,6 +1,5 @@
 package com.example.movie_nights_rest.controller;
 
-import com.example.movie_nights_rest.command.auth.LoginRequest;
 import com.example.movie_nights_rest.command.user.CreateOrUpdateUserCommand;
 import com.example.movie_nights_rest.command.user.UserResponseCommand;
 import com.example.movie_nights_rest.model.Role;
@@ -11,8 +10,6 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -32,7 +29,7 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasRole('" + Role.ADMIN + "')")
     @ApiOperation("Get all users. Available for ADMIN users.")
-    public Flux<UserResponseCommand> getAll() {
+    public Iterable<UserResponseCommand> getAll() {
         return userService.getAll();
     }
 
@@ -40,16 +37,14 @@ public class UserController {
     @PostMapping
     @ApiOperation("Create new user. Available for all users.")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<UserResponseCommand> create(
+    public UserResponseCommand create(
             @Valid
             @RequestBody
             @ApiParam("User information.")
-                    Mono<CreateOrUpdateUserCommand> request
+                    CreateOrUpdateUserCommand request
     ) {
-        return request.flatMap(r -> {
-            var roles = new ArrayList<String>();
-            roles.add(Role.BASIC);
-            return userService.create(r.getUsername(), r.getPassword(), roles);
-        }).switchIfEmpty(Mono.empty());
+        var roles = new ArrayList<String>();
+        roles.add(Role.BASIC);
+        return userService.create(request.getUsername(), request.getPassword(), roles);
     }
 }
