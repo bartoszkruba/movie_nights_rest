@@ -4,10 +4,11 @@ spring:
       client:
         registration:
           google:
-            clientId: 5014057553-8gm9um6vnli3cle5rgigcdjpdrid14m9.apps.googleusercontent.com
-            clientSecret: tWZKVLxaD_ARWsriiiUFYoIk
+            client-id: 797817936580-tuc8ipc37l9fge52e335r0sagevaqmu4.apps.googleusercontent.com
+            client-secret: f8n8RCetObM_IvKYbsjIFE2f
+            clientName: Web client 1
             provider: google
-            redirectUriTemplate: "{baseUrl}/oauth2/callback/{registrationId}"
+            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
             scope:
               - email
               - profile
