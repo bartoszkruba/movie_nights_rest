@@ -10,6 +10,7 @@ spring:
             provider: google
             redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
             scope:
+              - calendar
               - email
               - profile
 app:

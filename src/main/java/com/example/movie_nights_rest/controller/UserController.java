@@ -1,18 +1,15 @@
 package com.example.movie_nights_rest.controller;
 
-import com.example.movie_nights_rest.command.user.CreateOrUpdateUserCommand;
+import com.example.movie_nights_rest.annotation.CurrentUser;
 import com.example.movie_nights_rest.command.user.UserResponseCommand;
+import com.example.movie_nights_rest.config.security.UserPrincipal;
 import com.example.movie_nights_rest.model.Role;
 import com.example.movie_nights_rest.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.ArrayList;
 
 
 @RestController
@@ -34,17 +31,10 @@ public class UserController {
     }
 
 
-    @PostMapping
-    @ApiOperation("Create new user. Available for all users.")
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseCommand create(
-            @Valid
-            @RequestBody
-            @ApiParam("User information.")
-                    CreateOrUpdateUserCommand request
-    ) {
-        var roles = new ArrayList<String>();
-        roles.add(Role.BASIC);
-        return userService.create(request.getUsername(), request.getPassword(), roles);
+    @GetMapping
+    @Secured({Role.BASIC, Role.ADMIN})
+    @ApiOperation("Get information about your account")
+    public UserResponseCommand getCurrentUser(@CurrentUser UserPrincipal userPrincipal) {
+        return userService.getById(userPrincipal.getId());
     }
 }

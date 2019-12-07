@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
 @Data
@@ -11,8 +12,9 @@ import javax.validation.constraints.NotEmpty;
 public class LoginRequest {
 
     @NotEmpty(message = "Username cannot be empty")
-    @ApiModelProperty("Username")
-    private String username;
+    @Email(message = "Invalid email")
+    @ApiModelProperty("Email")
+    private String email;
 
     @NotEmpty(message = "Password cannot be empty")
     @ApiModelProperty("Password")

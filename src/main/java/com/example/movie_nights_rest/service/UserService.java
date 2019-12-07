@@ -1,6 +1,8 @@
 package com.example.movie_nights_rest.service;
 
 import com.example.movie_nights_rest.command.user.UserResponseCommand;
+import com.example.movie_nights_rest.exception.ResourceNotFoundException;
+import com.example.movie_nights_rest.model.AuthProvider;
 import com.example.movie_nights_rest.model.User;
 import com.example.movie_nights_rest.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,12 +27,17 @@ public class UserService {
         return userRepository.findAll().stream().map(UserResponseCommand::new).collect(Collectors.toList());
     }
 
-    public UserResponseCommand create(String username, String password, ArrayList<String> roles) {
+    public UserResponseCommand create(String email, String password, ArrayList<String> roles, AuthProvider authProvider) {
         var user = User.builder()
-                .username(username)
-//                .password(bCryptPasswordEncoder.encode(password))
+                .email(email)
+                .provider(authProvider)
+                .password(bCryptPasswordEncoder.encode(password))
                 .roles(roles).build();
 
         return new UserResponseCommand(userRepository.save(user));
+    }
+
+    public UserResponseCommand getById(String id) {
+        return userRepository.findById(id).map(UserResponseCommand::new).orElseThrow(ResourceNotFoundException::new);
     }
 }
