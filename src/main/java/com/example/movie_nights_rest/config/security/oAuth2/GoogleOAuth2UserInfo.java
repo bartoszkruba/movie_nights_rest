@@ -1,4 +1,4 @@
-package com.example.movie_nights_rest.config.security.oAuth;
+package com.example.movie_nights_rest.config.security.oAuth2;
 
 import java.util.Map;
 

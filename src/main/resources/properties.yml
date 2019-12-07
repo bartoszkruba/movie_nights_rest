@@ -6,6 +6,7 @@ spring:
           google:
             clientId: 5014057553-8gm9um6vnli3cle5rgigcdjpdrid14m9.apps.googleusercontent.com
             clientSecret: tWZKVLxaD_ARWsriiiUFYoIk
+            provider: google
             redirectUriTemplate: "{baseUrl}/oauth2/callback/{registrationId}"
             scope:
               - email

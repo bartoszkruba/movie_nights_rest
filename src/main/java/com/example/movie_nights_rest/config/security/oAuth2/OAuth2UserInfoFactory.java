@@ -1,7 +1,5 @@
-package com.example.movie_nights_rest.config.security.oAuth;
+package com.example.movie_nights_rest.config.security.oAuth2;
 
-import com.example.movie_nights_rest.config.security.oAuth.GoogleOAuth2UserInfo;
-import com.example.movie_nights_rest.config.security.oAuth.OAuth2UserInfo;
 import com.example.movie_nights_rest.model.AuthProvider;
 
 import java.util.Map;

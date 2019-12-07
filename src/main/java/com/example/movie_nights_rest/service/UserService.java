@@ -28,7 +28,7 @@ public class UserService {
     public UserResponseCommand create(String username, String password, ArrayList<String> roles) {
         var user = User.builder()
                 .username(username)
-                .password(bCryptPasswordEncoder.encode(password))
+//                .password(bCryptPasswordEncoder.encode(password))
                 .roles(roles).build();
 
         return new UserResponseCommand(userRepository.save(user));

@@ -1,4 +1,4 @@
-package com.example.movie_nights_rest.config.security.oAuth;
+package com.example.movie_nights_rest.config.security.oAuth2;
 
 import com.example.movie_nights_rest.util.CookieUtils;
 import com.nimbusds.oauth2.sdk.util.StringUtils;

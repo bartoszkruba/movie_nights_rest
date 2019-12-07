@@ -1,9 +1,7 @@
-package com.example.movie_nights_rest.config.security;
+package com.example.movie_nights_rest.config.security.oAuth2;
 
 import com.example.movie_nights_rest.config.AppProperties;
 import com.example.movie_nights_rest.config.security.jwt.TokenProvider;
-import com.example.movie_nights_rest.config.security.oAuth.HttpCookieOAuthAuthorizationRequestRepository;
-import com.example.movie_nights_rest.exception.BadRequestException;
 import com.example.movie_nights_rest.util.CookieUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -19,7 +17,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
 
-import static com.example.movie_nights_rest.config.security.oAuth.HttpCookieOAuthAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
+import static com.example.movie_nights_rest.config.security.oAuth2.HttpCookieOAuthAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
 
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -41,7 +39,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws IOException, ServletException {
         String targetUrl = determineTargetUrl(request, response, authentication);
 
         if (response.isCommitted()) {

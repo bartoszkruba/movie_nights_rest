@@ -15,19 +15,19 @@ import javax.validation.Valid;
 @Api("Endpoints for authentication.")
 public class AuthController {
 
-    private final AuthService authService;
-
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
-
-    @PostMapping("/login")
-    @ApiOperation("Login to your account")
-    public LoginResponse login(
-            @Valid
-            @RequestBody
-            @ApiParam("Login information")
-                    LoginRequest request) {
-        return authService.login(request);
-    }
+//    private final AuthService authService;
+//
+//    public AuthController(AuthService authService) {
+//        this.authService = authService;
+//    }
+//
+//    @PostMapping("/login")
+//    @ApiOperation("Login to your account")
+//    public LoginResponse login(
+//            @Valid
+//            @RequestBody
+//            @ApiParam("Login information")
+//                    LoginRequest request) {
+//        return authService.login(request);
+//    }
 }
