@@ -1,4 +1,4 @@
-package com.example.movie_nights_rest.config.security.jwt;
+package com.example.movie_nights_rest.util;
 
 import com.example.movie_nights_rest.config.AppProperties;
 import com.example.movie_nights_rest.config.security.UserPrincipal;

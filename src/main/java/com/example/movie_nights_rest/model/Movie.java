@@ -43,6 +43,8 @@ public class Movie {
         this.boxOffice = movie.getBoxOffice();
         this.production = movie.getProduction();
         this.website = movie.getWebsite();
+        this.smallPoster = movie.getPoster();
+        this.bigPoster = movie.getPoster().replace("X300.jpg", ".jpg");
     }
 
     private String title;
@@ -92,4 +94,8 @@ public class Movie {
     private String production;
 
     private String website;
+
+    private String smallPoster;
+
+    private String bigPoster;
 }

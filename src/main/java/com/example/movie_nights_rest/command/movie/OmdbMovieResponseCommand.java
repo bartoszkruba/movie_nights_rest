@@ -19,9 +19,11 @@ public class OmdbMovieResponseCommand {
     @JsonProperty("Title")
     private String title;
 
-    @Id
     @JsonProperty("imdbID")
     private String imdbID;
+
+    @JsonProperty("Poster")
+    private String poster;
 
     @JsonProperty("Year")
     private String year;

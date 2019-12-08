@@ -4,7 +4,6 @@ package com.example.movie_nights_rest.command.movie;
 import com.example.movie_nights_rest.model.Movie;
 import com.example.movie_nights_rest.model.Rating;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,6 +40,9 @@ public class MovieResponseCommand {
         this.boxOffice = movie.getBoxOffice();
         this.production = movie.getProduction();
         this.website = movie.getWebsite();
+
+        this.smallPoster = movie.getPoster();
+        this.bigPoster = movie.getPoster().replace("X300.jpg", ".jpg");
     }
 
     public MovieResponseCommand(Movie movie, String plot) {
@@ -68,6 +70,9 @@ public class MovieResponseCommand {
         this.boxOffice = movie.getBoxOffice();
         this.production = movie.getProduction();
         this.website = movie.getWebsite();
+
+        this.smallPoster = movie.getSmallPoster();
+        this.bigPoster = movie.getBigPoster();
     }
 
     private String title;
@@ -77,6 +82,10 @@ public class MovieResponseCommand {
     private String year;
 
     private String rated;
+
+    private String smallPoster;
+
+    private String bigPoster;
 
     private String released;
 

@@ -4,7 +4,7 @@ import com.example.movie_nights_rest.command.auth.LoginRequest;
 import com.example.movie_nights_rest.command.auth.LoginResponse;
 import com.example.movie_nights_rest.command.user.CreateOrUpdateUserCommand;
 import com.example.movie_nights_rest.command.user.UserResponseCommand;
-import com.example.movie_nights_rest.config.security.jwt.TokenProvider;
+import com.example.movie_nights_rest.util.TokenProvider;
 import com.example.movie_nights_rest.model.AuthProvider;
 import com.example.movie_nights_rest.model.Role;
 import com.example.movie_nights_rest.service.UserService;

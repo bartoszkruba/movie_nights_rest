@@ -1,10 +1,9 @@
 package com.example.movie_nights_rest.config.security.oAuth2;
 
 import com.example.movie_nights_rest.config.AppProperties;
-import com.example.movie_nights_rest.config.security.jwt.TokenProvider;
+import com.example.movie_nights_rest.util.TokenProvider;
 import com.example.movie_nights_rest.util.CookieUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
