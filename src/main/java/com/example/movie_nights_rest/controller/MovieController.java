@@ -26,7 +26,7 @@ public class MovieController {
 
     @GetMapping("/{id}")
     @ApiOperation("Find movie by id. Available for registered users.")
-    @Secured({Role.ADMIN, Role.BASIC})
+//    @Secured({Role.ADMIN, Role.BASIC})
     public MovieResponseCommand fetchMovie(
             @ApiParam(value = "IMDB ID")
             @PathVariable
@@ -40,14 +40,14 @@ public class MovieController {
     @GetMapping("/single")
     @ApiOperation("Fetch movies. Available for registered users.")
     @PreAuthorize("hasRole('" + Role.BASIC + "') or hasRole('" + Role.ADMIN + "')")
-    @Secured({Role.ADMIN, Role.BASIC})
+//    @Secured({Role.ADMIN, Role.BASIC})
     public MovieResponseCommand fetchMovie(
             @ApiParam(value = "Movie title")
             @RequestParam
                     String title,
-            @ApiParam(value = "Type of result to return (movie, series or episode)")
+            @ApiParam(value = "Type of result to return (movie, series or episode)", defaultValue = "type")
             @RequestParam(required = false)
-                    String type,
+                    Type type,
             @ApiParam(value = "Year of release")
             @RequestParam(required = false)
                     String year,
@@ -60,14 +60,14 @@ public class MovieController {
 
     @GetMapping("/many")
     @ApiOperation("Fetch movie page. Available for registered users.")
-    @Secured({Role.ADMIN, Role.BASIC})
+//    @Secured({Role.ADMIN, Role.BASIC})
     public MoviePageResponseCommand fetchMovies(
             @ApiParam(value = "Move title")
             @RequestParam(required = false)
                     String title,
-            @ApiParam(value = "Type of result to return (movie, series or episode)")
+            @ApiParam(value = "Type of result to return (movie, series or episode)", defaultValue = "movie")
             @RequestParam(required = false)
-                    String type,
+                    Type type,
             @ApiParam("Year of release")
             @RequestParam(required = false)
                     String year,
@@ -75,6 +75,6 @@ public class MovieController {
             @RequestParam(defaultValue = "1")
                     Integer page
     ) throws URISyntaxException {
-        return movieService.fetchMoviePage(title, type, year, 1);
+        return movieService.fetchMoviePage(title, type, year, page);
     }
 }

@@ -4,6 +4,8 @@ import com.example.movie_nights_rest.command.movie.MoviePageResponseCommand;
 import com.example.movie_nights_rest.command.movie.MovieResponseCommand;
 import com.example.movie_nights_rest.command.movie.OmdbMovieResponseCommand;
 import com.example.movie_nights_rest.command.movie.OmdbSearchPageCommand;
+import com.example.movie_nights_rest.controller.Type;
+import com.example.movie_nights_rest.exception.InternalServerErrorException;
 import com.example.movie_nights_rest.exception.UnauthorizedException;
 import com.example.movie_nights_rest.model.Movie;
 import com.example.movie_nights_rest.repository.MovieRepository;
@@ -27,39 +29,46 @@ public class MovieService {
         this.movieRepository = movieRepository;
     }
 
-    public MovieResponseCommand fetchMovie(String id, String title, String type, String year, String plot) {
+    public MovieResponseCommand fetchMovie(String id, String title, Type type, String year, String plot) {
 
-        var local = movieRepository.findById(id);
+        if (id == null && title == null) throw new BadRequestException();
 
-        return local.map(movie -> new MovieResponseCommand(movie, plot))
-                .orElseGet(() -> {
-                    try {
-                        return fetchFromOMDB(id, title, type, year, plot);
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                });
+        if (id != null) {
+            var local = movieRepository.findById(id);
+
+            return local.map(movie -> new MovieResponseCommand(movie, plot))
+                    .orElseGet(() -> fetchFromOMDB(id, title, type, year, plot));
+        } else {
+            return fetchFromOMDB(id, title, type, year, plot);
+        }
+
     }
 
     private MovieResponseCommand fetchMovie(String id) {
         return fetchMovie(id, null, null, null, null);
     }
 
-    public MoviePageResponseCommand fetchMoviePage(String title, String type, String year, Integer page)
-            throws URISyntaxException {
+    public MoviePageResponseCommand fetchMoviePage(String title, Type type, String year, Integer page) {
+
+        if (title == null) throw new BadRequestException();
+
         var uri = UriComponentsBuilder.newInstance()
                 .scheme("http").host("www.omdbapi.com")
                 .path("/")
                 .queryParam("apikey", API_KEY);
         if (title != null) uri.queryParam("s", URLDecoder.decode(title));
-        if (type != null) uri.queryParam("type", type);
+        if (type != null) uri.queryParam("type", type.toString());
         if (year != null) uri.queryParam("y", year);
         if (page != null) uri.queryParam("page", page);
 
         uri.buildAndExpand();
 
-        var response = new RestTemplate().getForEntity(new URI(uri.toUriString()), OmdbSearchPageCommand.class).getBody();
+        OmdbSearchPageCommand response;
+        try {
+            response = new RestTemplate().getForEntity(new URI(uri.toUriString()), OmdbSearchPageCommand.class).getBody();
+        } catch (URISyntaxException e) {
+            throw new InternalServerErrorException();
+        }
         if (response == null) throw new BadRequestException();
         var movies = response.getSearch().stream().map(movie -> fetchMovie(movie.getImdbID()));
 
@@ -70,8 +79,7 @@ public class MovieService {
         return moviePage;
     }
 
-    private MovieResponseCommand fetchFromOMDB(String id, String title, String type, String year, String plot)
-            throws URISyntaxException {
+    private MovieResponseCommand fetchFromOMDB(String id, String title, Type type, String year, String plot) {
         var uri = UriComponentsBuilder.newInstance()
                 .scheme("http").host("www.omdbapi.com")
                 .path("/")
@@ -81,7 +89,7 @@ public class MovieService {
         else if (title != null) uri.queryParam("t", title);
         else throw new BadRequestException();
 
-        if (type != null) uri.queryParam("type", type);
+        if (type != null) uri.queryParam("type", type.toString());
         if (year != null) uri.queryParam("y", year);
         if (plot != null) uri.queryParam("plot", plot);
 
@@ -96,12 +104,14 @@ public class MovieService {
     }
 
     @Async
-    void saveMovieIfNotExist(String id) throws URISyntaxException {
-        if (movieRepository.findById(id).isEmpty()) saveMovieToDatabase(id);
+    void saveMovieIfNotExist(String id) {
+        if (movieRepository.findById(id).isEmpty()) {
+            saveMovieToDatabase(id);
+        }
 
     }
 
-    private void saveMovieToDatabase(String id) throws URISyntaxException {
+    private void saveMovieToDatabase(String id) {
         var uri = UriComponentsBuilder.newInstance()
                 .scheme("http").host("www.omdbapi.com")
                 .path("/")
@@ -109,8 +119,13 @@ public class MovieService {
         uri.queryParam("i", id);
         uri.buildAndExpand();
 
-        var fetched = new RestTemplate().getForEntity(new URI(uri.toUriString()), OmdbMovieResponseCommand.class)
-                .getBody();
+        OmdbMovieResponseCommand fetched = null;
+        try {
+            fetched = new RestTemplate().getForEntity(new URI(uri.toUriString()), OmdbMovieResponseCommand.class)
+                    .getBody();
+        } catch (URISyntaxException e) {
+            throw new InternalServerErrorException();
+        }
 
         if (fetched == null) throw new UnauthorizedException();
         Movie toSave = new Movie(fetched, "short");
@@ -123,8 +138,12 @@ public class MovieService {
         uri.queryParam("plot", "full");
         uri.buildAndExpand();
 
-        fetched = new RestTemplate().getForEntity(new URI(fullPlotUri.toUriString()), OmdbMovieResponseCommand.class)
-                .getBody();
+        try {
+            fetched = new RestTemplate().getForEntity(new URI(fullPlotUri.toUriString()), OmdbMovieResponseCommand.class)
+                    .getBody();
+        } catch (URISyntaxException e) {
+            throw new InternalServerErrorException();
+        }
 
         toSave.setLongPlot(fetched.getPlot());
 
