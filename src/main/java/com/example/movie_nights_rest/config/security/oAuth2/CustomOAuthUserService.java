@@ -1,6 +1,7 @@
 package com.example.movie_nights_rest.config.security.oAuth2;
 
 import com.example.movie_nights_rest.config.security.UserPrincipal;
+import com.example.movie_nights_rest.exception.OAuth2AuthenticationProcessingException;
 import com.example.movie_nights_rest.model.AuthProvider;
 import com.example.movie_nights_rest.model.Role;
 import com.example.movie_nights_rest.model.User;
@@ -47,7 +48,7 @@ public class CustomOAuthUserService extends DefaultOAuth2UserService {
         String email = userInfo.getEmail();
 
         if (StringUtils.isEmpty(email))
-            throw new RuntimeException("Email not found from OAuth2 provider");
+            throw new OAuth2AuthenticationProcessingException("Email not found from OAuth2 provider");
 
         Optional<User> userOptional = userRepository.findByEmail(email);
 
@@ -56,7 +57,7 @@ public class CustomOAuthUserService extends DefaultOAuth2UserService {
         if (userOptional.isPresent()) {
             user = userOptional.get();
             if (!user.getProvider().equals(AuthProvider.valueOf(userRequest.getClientRegistration().getClientId()))) {
-                throw new RuntimeException("Looks like you're signed up with " +
+                throw new OAuth2AuthenticationProcessingException("Looks like you're signed up with " +
                         user.getProvider() + " account. Please use your " + user.getProvider() +
                         " account to login.");
             }

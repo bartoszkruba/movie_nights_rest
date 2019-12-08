@@ -24,14 +24,14 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('" + Role.ADMIN + "')")
+    @Secured({Role.ADMIN})
     @ApiOperation("Get all users. Available for ADMIN users.")
     public Iterable<UserResponseCommand> getAll() {
         return userService.getAll();
     }
 
 
-    @GetMapping
+    @GetMapping("/me")
     @Secured({Role.BASIC, Role.ADMIN})
     @ApiOperation("Get information about your account")
     public UserResponseCommand getCurrentUser(@CurrentUser UserPrincipal userPrincipal) {

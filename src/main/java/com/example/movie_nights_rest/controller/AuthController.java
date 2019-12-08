@@ -45,11 +45,10 @@ public class AuthController {
             @RequestBody
             @ApiParam("Login information")
                     LoginRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
+
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                request.getEmail(),
+                request.getPassword())
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
