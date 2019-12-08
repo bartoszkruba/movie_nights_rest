@@ -7,6 +7,7 @@ import com.example.movie_nights_rest.service.MovieService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,7 @@ public class MovieController {
 
     @GetMapping("/{id}")
     @ApiOperation("Find movie by id. Available for registered users.")
-    @PreAuthorize("hasRole('" + Role.BASIC + "') or hasRole('" + Role.ADMIN + "')")
+    @Secured({Role.ADMIN, Role.BASIC})
     public MovieResponseCommand fetchMovie(
             @ApiParam(value = "IMDB ID")
             @PathVariable
@@ -39,6 +40,7 @@ public class MovieController {
     @GetMapping("/single")
     @ApiOperation("Fetch movies. Available for registered users.")
     @PreAuthorize("hasRole('" + Role.BASIC + "') or hasRole('" + Role.ADMIN + "')")
+    @Secured({Role.ADMIN, Role.BASIC})
     public MovieResponseCommand fetchMovie(
             @ApiParam(value = "Movie title")
             @RequestParam
@@ -58,7 +60,7 @@ public class MovieController {
 
     @GetMapping("/many")
     @ApiOperation("Fetch movie page. Available for registered users.")
-//    @PreAuthorize("hasRole('" + Role.BASIC + "') or hasRole('" + Role.ADMIN + "')")
+    @Secured({Role.ADMIN, Role.BASIC})
     public MoviePageResponseCommand fetchMovies(
             @ApiParam(value = "Move title")
             @RequestParam(required = false)
@@ -69,10 +71,10 @@ public class MovieController {
             @ApiParam("Year of release")
             @RequestParam(required = false)
                     String year,
-            @ApiParam("Page number")
+            @ApiParam(value = "Page number", defaultValue = "1", required = true)
             @RequestParam(defaultValue = "1")
                     Integer page
     ) throws URISyntaxException {
-        return movieService.fetchMoviePage(title, type, year, page);
+        return movieService.fetchMoviePage(title, type, year, 1);
     }
 }
