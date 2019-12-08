@@ -2,6 +2,7 @@ package com.example.movie_nights_rest.config.security;
 
 import com.example.movie_nights_rest.config.security.jwt.TokenAuthenticationFilter;
 import com.example.movie_nights_rest.config.security.oAuth2.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
+@RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final CustomUserDetailsService customUserDetailsService;
@@ -29,24 +31,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
-
-    public SecurityConfiguration(CustomUserDetailsService customUserDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder,
-                                 RestAuthenticationEntryPoint authenticationEntryPoint,
-                                 HttpCookieOAuthAuthorizationRequestRepository cookieAuthorizationRequestRepository,
-                                 CustomOAuthUserService customOAuthUserService,
-                                 OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
-                                 OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler,
-                                 TokenAuthenticationFilter tokenAuthenticationFilter) {
-
-        this.customUserDetailsService = customUserDetailsService;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.authenticationEntryPoint = authenticationEntryPoint;
-        this.cookieAuthorizationRequestRepository = cookieAuthorizationRequestRepository;
-        this.customOAuthUserService = customOAuthUserService;
-        this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
-        this.oAuth2AuthenticationFailureHandler = oAuth2AuthenticationFailureHandler;
-        this.tokenAuthenticationFilter = tokenAuthenticationFilter;
-    }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {

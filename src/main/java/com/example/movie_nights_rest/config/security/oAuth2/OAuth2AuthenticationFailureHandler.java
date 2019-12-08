@@ -2,6 +2,7 @@ package com.example.movie_nights_rest.config.security.oAuth2;
 
 
 import com.example.movie_nights_rest.util.CookieUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
@@ -16,14 +17,10 @@ import java.io.IOException;
 import static com.example.movie_nights_rest.config.security.oAuth2.HttpCookieOAuthAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
 
 @Component
+@RequiredArgsConstructor
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
-    private final HttpCookieOAuthAuthorizationRequestRepository httpCookieOAuthAuthorizationRequestRepository;
-
-    public OAuth2AuthenticationFailureHandler(HttpCookieOAuthAuthorizationRequestRepository
-                                                      httpCookieOAuthAuthorizationRequestRepository) {
-        this.httpCookieOAuthAuthorizationRequestRepository = httpCookieOAuthAuthorizationRequestRepository;
-    }
+    private final HttpCookieOAuthAuthorizationRequestRepository cookieRepository;
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
@@ -36,7 +33,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
         targetUrl = UriComponentsBuilder.fromUriString(targetUrl).queryParam("error", exception.getLocalizedMessage())
                 .build().toUriString();
 
-        httpCookieOAuthAuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
+        cookieRepository.removeAuthorizationRequestCookies(request, response);
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }

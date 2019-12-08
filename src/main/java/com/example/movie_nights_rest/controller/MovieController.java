@@ -3,11 +3,12 @@ package com.example.movie_nights_rest.controller;
 import com.example.movie_nights_rest.command.movie.MoviePageResponseCommand;
 import com.example.movie_nights_rest.command.movie.MovieResponseCommand;
 import com.example.movie_nights_rest.model.Role;
+import com.example.movie_nights_rest.model.Type;
 import com.example.movie_nights_rest.service.MovieService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.security.access.annotation.Secured;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,13 +17,10 @@ import java.net.URISyntaxException;
 @RestController
 @RequestMapping("/api/movie")
 @Api("Endpoints for movies")
+@RequiredArgsConstructor
 public class MovieController {
 
     private final MovieService movieService;
-
-    public MovieController(MovieService movieService) {
-        this.movieService = movieService;
-    }
 
     @GetMapping("/{id}")
     @ApiOperation("Find movie by id. Available for registered users.")

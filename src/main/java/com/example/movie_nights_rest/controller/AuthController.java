@@ -11,6 +11,7 @@ import com.example.movie_nights_rest.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,18 +25,13 @@ import java.util.ArrayList;
 @RestController
 @RequestMapping("/api/auth")
 @Api("Endpoints for authentication.")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
 
     private final TokenProvider tokenProvider;
-
-    public AuthController(AuthenticationManager authenticationManager, UserService userService, TokenProvider tokenProvider) {
-        this.authenticationManager = authenticationManager;
-        this.userService = userService;
-        this.tokenProvider = tokenProvider;
-    }
 
 
     @PostMapping("/login")

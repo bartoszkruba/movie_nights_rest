@@ -6,6 +6,7 @@ import com.example.movie_nights_rest.model.AuthProvider;
 import com.example.movie_nights_rest.model.Role;
 import com.example.movie_nights_rest.model.User;
 import com.example.movie_nights_rest.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -19,13 +20,10 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class CustomOAuthUserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
-
-    public CustomOAuthUserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
