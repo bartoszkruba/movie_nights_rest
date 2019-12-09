@@ -28,7 +28,7 @@ public class TokenProvider {
                 .setSubject(userPrincipal.getId())
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.ES512, appProperties.getAuth().getTokenSecret())
+                .signWith(SignatureAlgorithm.HS256, appProperties.getAuth().getTokenSecret())
                 .compact();
     }
 

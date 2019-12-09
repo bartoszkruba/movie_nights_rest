@@ -18,7 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
+//@EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 @RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -65,15 +65,18 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .csrf().disable()
                 .formLogin().disable()
+                .httpBasic().disable()
                 .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and()
                 .authorizeRequests().anyRequest().permitAll().and()
-                .oauth2Login().authorizationEndpoint().baseUri("/oauth/authorize")
+                .oauth2Login().redirectionEndpoint().baseUri("/oauth2/callback/*").and()
+                .authorizationEndpoint().baseUri("/oauth2/authorize")
                 .authorizationRequestRepository(cookieAuthorizationRequestRepository).and()
                 .userInfoEndpoint()
                 .userService(customOAuthUserService)
                 .and()
                 .successHandler(oAuth2AuthenticationSuccessHandler)
                 .failureHandler(oAuth2AuthenticationFailureHandler);
+
         http.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }
