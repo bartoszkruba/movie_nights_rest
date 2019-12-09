@@ -26,6 +26,7 @@ import java.util.ArrayList;
 @RequestMapping("/api/auth")
 @Api("Endpoints for authentication.")
 @RequiredArgsConstructor
+@CrossOrigin
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;

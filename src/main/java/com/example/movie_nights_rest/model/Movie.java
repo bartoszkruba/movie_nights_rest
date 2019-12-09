@@ -20,6 +20,7 @@ import java.util.ArrayList;
 public class Movie {
 
     public Movie(OmdbMovieResponseCommand movie, String plot) {
+        this.title = movie.getTitle();
         this.imdbID = movie.getImdbID();
         this.year = movie.getYear();
         this.rated = movie.getRated();

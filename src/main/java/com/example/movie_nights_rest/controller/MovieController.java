@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 @RequestMapping("/api/movie")
 @Api("Endpoints for movies")
 @RequiredArgsConstructor
+@CrossOrigin
 public class MovieController {
 
     private final MovieService movieService;

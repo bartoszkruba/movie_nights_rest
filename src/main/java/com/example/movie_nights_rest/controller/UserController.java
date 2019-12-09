@@ -7,6 +7,7 @@ import com.example.movie_nights_rest.model.Role;
 import com.example.movie_nights_rest.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/user")
 @Api("Endpoints for users.")
 @RequiredArgsConstructor
+@CrossOrigin
 public class UserController {
 
     private final UserService userService;
@@ -32,7 +34,7 @@ public class UserController {
     @GetMapping("/me")
     @Secured({Role.BASIC, Role.ADMIN})
     @ApiOperation("Get information about your account")
-    public UserResponseCommand getCurrentUser(@CurrentUser UserPrincipal userPrincipal) {
+    public UserResponseCommand getCurrentUser(@ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal) {
         return userService.getById(userPrincipal.getId());
     }
 }
