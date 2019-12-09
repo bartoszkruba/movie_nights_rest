@@ -28,8 +28,6 @@ public class CustomOAuthUserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
-        System.out.println("OAuth loadUser");
-
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
         try {
@@ -57,7 +55,7 @@ public class CustomOAuthUserService extends DefaultOAuth2UserService {
 
         if (userOptional.isPresent()) {
             user = userOptional.get();
-            if (!user.getProvider().equals(AuthProvider.valueOf(userRequest.getClientRegistration().getClientId()))) {
+            if (!user.getProvider().equals(AuthProvider.valueOf(userRequest.getClientRegistration().getRegistrationId()))) {
                 throw new OAuth2AuthenticationProcessingException("Looks like you're signed up with " +
                         user.getProvider() + " account. Please use your " + user.getProvider() +
                         " account to login.");

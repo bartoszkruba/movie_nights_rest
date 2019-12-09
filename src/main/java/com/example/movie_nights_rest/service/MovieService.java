@@ -96,7 +96,6 @@ public class MovieService {
         if (movie == null) return null;
         movieAsyncService.saveMovieIfNotExist(id);
 
-        System.out.println("Sending response");
         return new MovieResponseCommand(movie);
     }
 }
