@@ -22,13 +22,17 @@ public class UserResponseCommand {
     @ApiModelProperty("User ID")
     private String id;
     @ApiModelProperty("Username")
-    private String username;
+    private String name;
     @ApiModelProperty("User roles")
     private ArrayList<String> roles;
+    @ApiModelProperty("User email")
+    private String email;
+
 
     public UserResponseCommand(User user) {
         this.id = user.getId();
-        this.username = user.getName();
+        this.name = user.getName();
         this.roles = user.getRoles();
+        this.email = user.getEmail();
     }
 }

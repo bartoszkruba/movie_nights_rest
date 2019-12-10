@@ -62,6 +62,7 @@ public class UserController {
     public void createFriendRequest(
             @ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal,
             @ApiParam("User email") @RequestParam String email) {
+
         friendRequestService.createFriendRequest(userPrincipal.getId(), email);
     }
 

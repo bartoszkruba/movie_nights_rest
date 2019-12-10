@@ -16,12 +16,13 @@ import lombok.NoArgsConstructor;
 public class FriendRequestCommand {
 
     public FriendRequestCommand(FriendRequest friendRequest) {
+
         this.senderId = friendRequest.getSender().getId();
         this.senderEmail = friendRequest.getSender().getEmail();
         this.senderName = friendRequest.getSender().getName();
 
         this.receiverId = friendRequest.getReceiver().getId();
-        this.receiverEmail = friendRequest.getReceiver().getId();
+        this.receiverEmail = friendRequest.getReceiver().getEmail();
         this.receiverName = friendRequest.getReceiver().getName();
     }
 

@@ -74,7 +74,7 @@ public class MovieController {
             @ApiParam(value = "Page number", defaultValue = "1", required = true)
             @RequestParam(defaultValue = "1")
                     Integer page
-    ) throws URISyntaxException {
+    ){
         return movieService.fetchMoviePage(title, type, year, page);
     }
 }

@@ -28,7 +28,8 @@ public class User {
 
     @DBRef(db = "users")
     @EqualsAndHashCode.Exclude
-    private ArrayList<User> friends;
+    @Builder.Default
+    private ArrayList<User> friends = new ArrayList<>();
 
     @Builder.Default
     @EqualsAndHashCode.Exclude

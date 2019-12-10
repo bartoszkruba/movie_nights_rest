@@ -31,6 +31,8 @@ public class FriendRequestService {
     public void createFriendRequest(String userId, String email) {
         var principal = userRepository.findById(userId).orElseThrow(ResourceNotFoundException::new);
 
+        if (principal.getEmail().equals(email)) throw new BadRequestException();
+
         var user = userRepository.findByEmail(email).orElseThrow(ResourceNotFoundException::new);
 
         if (principal.getFriends().contains(user)) throw new BadRequestException();
