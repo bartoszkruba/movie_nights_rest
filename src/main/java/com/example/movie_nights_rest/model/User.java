@@ -1,11 +1,9 @@
 package com.example.movie_nights_rest.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
@@ -23,12 +21,16 @@ public class User {
     @Indexed(unique = true)
     private String username;
 
-    private String password;
-
     @Indexed(unique = true)
     private String email;
     private AuthProvider provider;
     private String providerId;
 
-    private ArrayList<String> roles;
+    @DBRef(db = "users")
+    @EqualsAndHashCode.Exclude
+    private ArrayList<User> friends;
+
+    @Builder.Default
+    @EqualsAndHashCode.Exclude
+    private ArrayList<String> roles = new ArrayList<>();
 }

@@ -28,7 +28,6 @@ public class UserService {
         var user = User.builder()
                 .email(email)
                 .provider(authProvider)
-                .password(bCryptPasswordEncoder.encode(password))
                 .roles(roles).build();
 
         return new UserResponseCommand(userRepository.save(user));
@@ -37,4 +36,11 @@ public class UserService {
     public UserResponseCommand getById(String id) {
         return userRepository.findById(id).map(UserResponseCommand::new).orElseThrow(ResourceNotFoundException::new);
     }
+
+    public Iterable<UserResponseCommand> getUserFriends(String email) {
+        var user = userRepository.findByEmail(email).orElseThrow(ResourceNotFoundException::new);
+
+        return user.getFriends().stream().map(UserResponseCommand::new).collect(Collectors.toList());
+    }
+
 }
