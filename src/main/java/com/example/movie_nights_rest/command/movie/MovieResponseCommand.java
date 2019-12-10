@@ -20,6 +20,8 @@ public class MovieResponseCommand {
 
     public MovieResponseCommand(OmdbMovieResponseCommand movie) {
 
+        System.out.println("plot:" + movie.getPlot());
+
         this.title = movie.getTitle();
         this.imdbID = movie.getImdbID();
         this.year = movie.getYear();
@@ -46,7 +48,6 @@ public class MovieResponseCommand {
     }
 
     public MovieResponseCommand(Movie movie, String plot) {
-
         this.title = movie.getTitle();
         this.imdbID = movie.getImdbID();
         this.year = movie.getYear();
@@ -57,6 +58,8 @@ public class MovieResponseCommand {
         this.director = movie.getDirector();
         this.writer = movie.getWriter();
         this.actors = movie.getActors();
+
+        System.out.println(plot);
 
         if (plot != null && plot.equals("short")) this.plot = movie.getShortPlot();
         else if (plot != null) this.plot = movie.getLongPlot();

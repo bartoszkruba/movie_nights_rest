@@ -52,9 +52,9 @@ public class MovieAsyncService {
                 .scheme("http").host("www.omdbapi.com")
                 .path("/")
                 .queryParam("apikey", API_KEY);
-        uri.queryParam("i", id);
-        uri.queryParam("plot", "full");
-        uri.buildAndExpand();
+        fullPlotUri.queryParam("i", id);
+        fullPlotUri.queryParam("plot", "full");
+        fullPlotUri.buildAndExpand();
 
         try {
             fetched = new RestTemplate().getForEntity(new URI(fullPlotUri.toUriString()), OmdbMovieResponseCommand.class)
@@ -62,6 +62,9 @@ public class MovieAsyncService {
         } catch (URISyntaxException e) {
             throw new InternalServerErrorException();
         }
+
+        System.out.println(fullPlotUri.toUriString());
+        System.out.println("Setting long plot to " + fetched.getPlot());
 
         toSave.setLongPlot(fetched.getPlot());
 
