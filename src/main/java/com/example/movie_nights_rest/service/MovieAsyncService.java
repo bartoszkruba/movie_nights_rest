@@ -63,9 +63,6 @@ public class MovieAsyncService {
             throw new InternalServerErrorException();
         }
 
-        System.out.println(fullPlotUri.toUriString());
-        System.out.println("Setting long plot to " + fetched.getPlot());
-
         toSave.setLongPlot(fetched.getPlot());
 
         movieRepository.save(toSave);

@@ -41,7 +41,7 @@ public class MovieService {
     }
 
     private MovieResponseCommand fetchMovie(String id) {
-        return fetchMovie(id, null, null, null, null);
+        return fetchMovie(id, null, null, null, "short");
     }
 
     public MoviePageResponseCommand fetchMoviePage(String title, Type type, String year, Integer page) {
