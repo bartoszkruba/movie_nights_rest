@@ -18,13 +18,13 @@ public class FriendRequestService {
     private final UserRepository userRepository;
     private final FriendRequestRepository friendRequestRepository;
 
-    public Iterable<FriendRequestCommand> getPendingFriendRequests(String email) {
-        return friendRequestRepository.findAllByReceiver(email)
+    public Iterable<FriendRequestCommand> getPendingFriendRequests(String id) {
+        return friendRequestRepository.findAllByReceiverId(id)
                 .stream().map(FriendRequestCommand::new).collect(Collectors.toList());
     }
 
-    public Iterable<FriendRequestCommand> getCreatedFriendRequests(String email) {
-        return friendRequestRepository.findAllBySender(email)
+    public Iterable<FriendRequestCommand> getCreatedFriendRequests(String id) {
+        return friendRequestRepository.findAllBySenderId(id)
                 .stream().map(FriendRequestCommand::new).collect(Collectors.toList());
     }
 
@@ -35,22 +35,22 @@ public class FriendRequestService {
 
         if (principal.getFriends().contains(user)) throw new BadRequestException();
 
-        if (!friendRequestRepository.findAllBySenderAndReceiver(principal.getId(), user.getId()).isEmpty())
+        if (!friendRequestRepository.findBySenderIdAndReceiverId(principal.getId(), user.getId()).isEmpty())
             throw new BadRequestException();
 
-        var friendRequest = FriendRequest.builder().sender(principal.getId()).receiver(user.getId()).build();
+        var friendRequest = FriendRequest.builder().sender(principal).receiver(user).build();
 
         friendRequestRepository.save(friendRequest);
     }
 
     public void acceptFriendRequest(String userId, String requestId) {
         var request = friendRequestRepository.findById(requestId).orElseThrow(ResourceNotFoundException::new);
-        if (!request.getReceiver().equals(userId)) throw new UnauthorizedException();
+        if (!request.getReceiver().getId().equals(userId)) throw new UnauthorizedException();
 
         friendRequestRepository.delete(request);
 
-        var sender = userRepository.findById(request.getSender()).orElseThrow(ResourceNotFoundException::new);
-        var receiver = userRepository.findById(request.getReceiver()).orElseThrow(ResourceNotFoundException::new);
+        var sender = request.getSender();
+        var receiver = request.getReceiver();
 
         sender.getFriends().add(receiver);
         receiver.getFriends().add(sender);
@@ -62,7 +62,8 @@ public class FriendRequestService {
     public void discardFriendRequest(String userId, String requestId) {
         var request = friendRequestRepository.findById(requestId).orElseThrow(ResourceNotFoundException::new);
 
-        if (!request.getReceiver().equals(userId) && !request.getSender().equals(userId))
+        if (!request.getReceiver().getId().equals(userId)
+                && !request.getSender().getId().equals(userId))
             throw new UnauthorizedException();
 
         friendRequestRepository.delete(request);

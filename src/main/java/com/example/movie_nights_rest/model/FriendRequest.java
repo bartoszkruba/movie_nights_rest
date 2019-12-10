@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
@@ -16,9 +17,9 @@ public class FriendRequest {
     @Id
     String id;
 
-    // sender id
-    String sender;
+    @DBRef(db = "user")
+    User sender;
 
-    // receiver id
-    String receiver;
+    @DBRef(db = "user")
+    User receiver;
 }

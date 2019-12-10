@@ -6,9 +6,9 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface FriendRequestRepository extends MongoRepository<FriendRequest, String> {
-    List<FriendRequest> findAllBySender(String sender);
+    List<FriendRequest> findAllBySenderId(String senderId);
 
-    List<FriendRequest> findAllByReceiver(String receiver);
+    List<FriendRequest> findAllByReceiverId(String receiverId);
 
-    List<FriendRequest> findAllBySenderAndReceiver(String sender, String receiver);
+    List<FriendRequest> findBySenderIdAndReceiverId(String senderId, String receiverId);
 }

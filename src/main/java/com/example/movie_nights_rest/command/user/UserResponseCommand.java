@@ -28,7 +28,7 @@ public class UserResponseCommand {
 
     public UserResponseCommand(User user) {
         this.id = user.getId();
-        this.username = user.getUsername();
+        this.username = user.getName();
         this.roles = user.getRoles();
     }
 }

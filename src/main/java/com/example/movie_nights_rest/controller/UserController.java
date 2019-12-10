@@ -92,7 +92,7 @@ public class UserController {
     public Iterable<FriendRequestCommand> getPendingFriendRequests(
             @ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal) {
 
-        return friendRequestService.getPendingFriendRequests(userPrincipal.getEmail());
+        return friendRequestService.getPendingFriendRequests(userPrincipal.getId());
     }
 
     @GetMapping("/me/createdFriendRequest")
@@ -101,6 +101,6 @@ public class UserController {
     public Iterable<FriendRequestCommand> getCreatedFriendRequests(
             @ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal) {
 
-        return friendRequestService.getCreatedFriendRequests(userPrincipal.getEmail());
+        return friendRequestService.getCreatedFriendRequests(userPrincipal.getId());
     }
 }
