@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 public class FriendRequestCommand {
 
     public FriendRequestCommand(FriendRequest friendRequest) {
+        this.id = friendRequest.getId();
 
         this.senderId = friendRequest.getSender().getId();
         this.senderEmail = friendRequest.getSender().getEmail();
@@ -25,6 +26,9 @@ public class FriendRequestCommand {
         this.receiverEmail = friendRequest.getReceiver().getEmail();
         this.receiverName = friendRequest.getReceiver().getName();
     }
+
+    @ApiModelProperty("Request ID")
+    private String id;
 
     @ApiModelProperty("Sender ID")
     private String senderId;

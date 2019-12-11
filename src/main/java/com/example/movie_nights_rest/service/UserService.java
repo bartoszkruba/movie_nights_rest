@@ -43,4 +43,19 @@ public class UserService {
         return user.getFriends().stream().map(UserResponseCommand::new).collect(Collectors.toList());
     }
 
+    public void removeUserFromFriends(String principalId, String friendId) {
+        var principal = userRepository.findById(principalId).orElseThrow(ResourceNotFoundException::new);
+        var friend = principal.getFriends().stream()
+                .filter(user -> user.getId().equals(friendId))
+                .findFirst().orElseThrow(ResourceNotFoundException::new);
+
+        principal.getFriends().remove(friend);
+        var found = friend.getFriends().stream()
+                .filter(user -> user.getId().equals(principalId)).findFirst();
+
+        found.ifPresent(user -> friend.getFriends().remove(user));
+
+        userRepository.save(principal);
+        userRepository.save(friend);
+    }
 }

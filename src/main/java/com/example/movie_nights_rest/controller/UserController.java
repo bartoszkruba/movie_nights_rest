@@ -41,17 +41,26 @@ public class UserController {
         return userService.getById(userPrincipal.getId());
     }
 
-    @GetMapping("/me/friends")
+    @GetMapping("/me/friend")
     @Secured({Role.BASIC, Role.ADMIN})
     @ApiOperation("Get all your friends. Available for registered users.")
     public Iterable<UserResponseCommand> getUserFriends(@ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal) {
         return userService.getUserFriends(userPrincipal.getEmail());
     }
 
+    @DeleteMapping("/me/friend/{id}")
+    @Secured({Role.BASIC, Role.ADMIN})
+    @ApiOperation("Remove user from your friends. Available for registered users.")
+    public void removeFriends(
+            @ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal,
+            @ApiParam("Friend ID") @PathVariable String id) {
+        userService.removeUserFromFriends(userPrincipal.getId(), id);
+    }
+
     @GetMapping("/{id}")
     @Secured({Role.BASIC, Role.ADMIN})
     @ApiOperation("Get user by id. Available for registered users.")
-    public UserResponseCommand getUserById(@PathVariable String id) {
+    public UserResponseCommand getUserById(@ApiParam("User ID") @PathVariable String id) {
         return userService.getById(id);
     }
 
@@ -83,7 +92,6 @@ public class UserController {
     public void discardFriendReqeust(
             @ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal,
             @ApiParam("Request id") @PathVariable String id) {
-
         friendRequestService.discardFriendRequest(userPrincipal.getId(), id);
     }
 

@@ -26,7 +26,7 @@ public class User {
     private AuthProvider provider;
     private String providerId;
 
-    @DBRef(db = "users")
+    @DBRef(lazy = true)
     @EqualsAndHashCode.Exclude
     @Builder.Default
     private ArrayList<User> friends = new ArrayList<>();

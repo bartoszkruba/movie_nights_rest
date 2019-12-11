@@ -51,15 +51,6 @@ public class CustomOAuthUserService extends DefaultOAuth2UserService {
 
         String email = userInfo.getEmail();
 
-        System.out.println("access token: " + userRequest.getAccessToken().getTokenValue());
-        System.out.println("token type: " + userRequest.getAccessToken().getTokenType().getValue());
-        System.out.println("token scopes: " + userRequest.getClientRegistration().getScopes());
-        System.out.println("authorization type: " + userRequest.getClientRegistration().getAuthorizationGrantType().getValue());
-
-        for (Map.Entry<String, Object> entry : userRequest.getAdditionalParameters().entrySet()) {
-            System.out.println(entry.getKey() + ": " + entry.getValue());
-        }
-
         if (StringUtils.isEmpty(email))
             throw new OAuth2AuthenticationProcessingException("Email not found from OAuth2 provider");
 
