@@ -48,7 +48,7 @@ public class CustomOAuthUserService extends DefaultOAuth2UserService {
         OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuthUserInfo(
                 userRequest.getClientRegistration().getRegistrationId(),
                 oAuth2User.getAttributes());
-
+        String refreshToken = userRequest.getAdditionalParameters().get("refresh_token").toString();
         String email = userInfo.getEmail();
 
         if (StringUtils.isEmpty(email))
@@ -65,21 +65,22 @@ public class CustomOAuthUserService extends DefaultOAuth2UserService {
                         user.getProvider() + " account. Please use your " + user.getProvider() +
                         " account to login.");
             }
-            user = updateExistingUser(user, userInfo);
+            user = updateExistingUser(user, userInfo, refreshToken);
         } else {
-            user = registerNewUser(userRequest, userInfo);
+            user = registerNewUser(userRequest, userInfo, refreshToken);
         }
 
         return UserPrincipal.create(user);
     }
 
-    private User registerNewUser(OAuth2UserRequest userRequest, OAuth2UserInfo oAuth2UserInfo) {
+    private User registerNewUser(OAuth2UserRequest userRequest, OAuth2UserInfo oAuth2UserInfo, String refreshToken) {
         User user = new User();
 
         user.setProvider(AuthProvider.valueOf(userRequest.getClientRegistration().getRegistrationId()));
         user.setProviderId(oAuth2UserInfo.getId());
         user.setName(oAuth2UserInfo.getName());
         user.setEmail(oAuth2UserInfo.getEmail());
+        user.setRefreshToken(refreshToken);
 
         var roles = new ArrayList<String>();
         roles.add(Role.BASIC);
@@ -88,8 +89,9 @@ public class CustomOAuthUserService extends DefaultOAuth2UserService {
         return userRepository.save(user);
     }
 
-    private User updateExistingUser(User existingUser, OAuth2UserInfo oAuth2UserInfo) {
+    private User updateExistingUser(User existingUser, OAuth2UserInfo oAuth2UserInfo, String refreshToken) {
         existingUser.setName(oAuth2UserInfo.getName());
+        existingUser.setRefreshToken(refreshToken);
         return userRepository.save(existingUser);
     }
 }

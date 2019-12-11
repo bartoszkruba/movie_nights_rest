@@ -19,7 +19,9 @@ public class UserPrincipal implements OAuth2User, UserDetails {
     private String id;
     @Getter
     private String email;
-    private String password;
+    @Getter
+    private String refreshToken;
+
     @Builder.Default
     private Collection<? extends GrantedAuthority> authorities = new ArrayList<>();
     @Builder.Default
@@ -30,13 +32,14 @@ public class UserPrincipal implements OAuth2User, UserDetails {
         return UserPrincipal.builder()
                 .id(user.getId())
                 .email(user.getEmail())
+                .refreshToken(user.getRefreshToken())
                 .authorities(user.getRoles()
                         .stream()
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList())).build();
     }
 
-    public static UserPrincipal create(User user, Map<String, Object> attributes){
+    public static UserPrincipal create(User user, Map<String, Object> attributes) {
         return UserPrincipal.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -49,7 +52,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 
     @Override
     public String getPassword() {
-        return password;
+        return "";
     }
 
     @Override

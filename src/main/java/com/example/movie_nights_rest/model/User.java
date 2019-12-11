@@ -25,6 +25,7 @@ public class User {
     private String email;
     private AuthProvider provider;
     private String providerId;
+    private String refreshToken;
 
     @DBRef(lazy = true)
     @EqualsAndHashCode.Exclude
