@@ -23,6 +23,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+    private final TokenEndpointClient tokenEndpointClient;
+
     private final CustomUserDetailsService customUserDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
@@ -68,7 +70,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .httpBasic().disable()
                 .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and()
                 .authorizeRequests().anyRequest().permitAll().and()
-                .oauth2Login().redirectionEndpoint().baseUri("/oauth2/callback/*").and()
+                .oauth2Login()
+                .tokenEndpoint()
+                .accessTokenResponseClient(tokenEndpointClient).and()
+                .redirectionEndpoint().baseUri("/oauth2/callback/*").and()
                 .authorizationEndpoint().baseUri("/oauth2/authorize")
                 .authorizationRequestRepository(cookieAuthorizationRequestRepository).and()
                 .userInfoEndpoint()
@@ -79,4 +84,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         http.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }
+
 }

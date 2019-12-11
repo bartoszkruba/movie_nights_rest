@@ -6,14 +6,17 @@ spring:
           google:
             client-id: 797817936580-tuc8ipc37l9fge52e335r0sagevaqmu4.apps.googleusercontent.com
             client-secret: f8n8RCetObM_IvKYbsjIFE2f
-#            client-name: Web client 1
+            #            client-name: Web client 1
 #            provider: google
             redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
-            authorizationUri: https://accounts.google.com/o/oauth2/v2/auth?access_type=offline
             scope:
               - https://www.googleapis.com/auth/calendar
               - email
               - profile
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth?access_type=offline&prompt=consent
+
 app:
   auth:
     tokenSecret: 926D96C90030DD58429D2751AC1BDBBC

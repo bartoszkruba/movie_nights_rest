@@ -6,9 +6,12 @@ import com.example.movie_nights_rest.model.AuthProvider;
 import com.example.movie_nights_rest.model.Role;
 import com.example.movie_nights_rest.model.User;
 import com.example.movie_nights_rest.repository.UserRepository;
+import com.google.api.client.auth.oauth2.RefreshTokenRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.RequestEntity;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -24,6 +28,7 @@ import java.util.Optional;
 public class CustomOAuthUserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -45,6 +50,15 @@ public class CustomOAuthUserService extends DefaultOAuth2UserService {
                 oAuth2User.getAttributes());
 
         String email = userInfo.getEmail();
+
+        System.out.println("access token: " + userRequest.getAccessToken().getTokenValue());
+        System.out.println("token type: " + userRequest.getAccessToken().getTokenType().getValue());
+        System.out.println("token scopes: " + userRequest.getClientRegistration().getScopes());
+        System.out.println("authorization type: " + userRequest.getClientRegistration().getAuthorizationGrantType().getValue());
+
+        for (Map.Entry<String, Object> entry : userRequest.getAdditionalParameters().entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
 
         if (StringUtils.isEmpty(email))
             throw new OAuth2AuthenticationProcessingException("Email not found from OAuth2 provider");
