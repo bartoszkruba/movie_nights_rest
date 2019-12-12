@@ -1,7 +1,7 @@
 package com.example.movie_nights_rest.command.movieWatching;
 
-import com.example.movie_nights_rest.model.MovieWatching;
-import com.example.movie_nights_rest.model.User;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,18 +15,14 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MovieWatchingCommand {
+
+    private String movieId;
 
     private Long startTime;
 
     private Long endTime;
 
     private List<String> attendees;
-
-    public MovieWatchingCommand(MovieWatching movieWatching) {
-        ZoneId zoneId = ZoneId.systemDefault();
-        this.startTime = movieWatching.getStartTime().atZone(zoneId).toInstant().toEpochMilli();
-        this.endTime = movieWatching.getEndTime().atZone(zoneId).toInstant().toEpochMilli();
-        this.attendees = movieWatching.getAttendees().stream().map(User::getId).collect(Collectors.toList());
-    }
 }
