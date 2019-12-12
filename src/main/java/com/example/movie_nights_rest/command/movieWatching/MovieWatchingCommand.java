@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ApiModel("Movie Watching")
+@ApiModel("Movie watching event")
 public class MovieWatchingCommand {
 
     @ApiModelProperty("Movie ID")

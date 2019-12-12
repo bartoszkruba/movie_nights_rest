@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ApiModel("Friend request response")
+@ApiModel("Friend request")
 public class FriendRequestCommand {
 
     public FriendRequestCommand(FriendRequest friendRequest) {

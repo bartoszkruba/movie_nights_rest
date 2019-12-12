@@ -21,7 +21,7 @@ public class UserResponseCommand {
 
     @ApiModelProperty("User ID")
     private String id;
-    @ApiModelProperty("Username")
+    @ApiModelProperty("User Name")
     private String name;
     @ApiModelProperty("User roles")
     private ArrayList<String> roles;

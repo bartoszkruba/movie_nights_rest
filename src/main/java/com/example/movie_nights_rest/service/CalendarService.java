@@ -6,7 +6,6 @@ import com.example.movie_nights_rest.exception.InternalServerErrorException;
 import com.example.movie_nights_rest.exception.ResourceNotFoundException;
 import com.example.movie_nights_rest.model.User;
 import com.example.movie_nights_rest.repository.MovieRepository;
-import com.example.movie_nights_rest.repository.MovieWatchingRepository;
 import com.example.movie_nights_rest.repository.UserRepository;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -19,13 +18,14 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
-import com.google.api.services.calendar.model.Events;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,16 +34,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CalendarService {
 
-    @Setter
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String CLIENT_ID;
 
-    @Setter
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String CLIENT_SECRET;
 
     private final UserRepository userRepository;
-    private final MovieWatchingRepository movieWatchingRepository;
+    private final EmailAsyncService emailAsyncService;
     private final MovieRepository movieRepository;
 
     private GoogleCredential getCredentials(String refreshToken) {
@@ -59,50 +57,6 @@ public class CalendarService {
         }
     }
 
-    public void test(String refreshToken) {
-        var credentials = getCredentials(refreshToken);
-
-        var calendar = new Calendar.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credentials)
-                .setApplicationName("Test")
-                .build();
-
-        DateTime now = new DateTime(System.currentTimeMillis());
-        Events events;
-
-        try {
-            events = calendar.events().list("primary")
-                    .setMaxResults(10)
-                    .setTimeMin(now)
-                    .setOrderBy("startTime")
-                    .setSingleEvents(true)
-//                    .setQ("etag=Movie_Nights")
-                    .execute();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            throw new InternalServerErrorException();
-        }
-
-        var items = events.getItems();
-
-        if (items.isEmpty()) System.out.println("No upcoming events found.");
-        else {
-            System.out.println("Upcoming events: ");
-            for (Event event : items) {
-                var start = event.getStart().getDateTime();
-                if (start == null) {
-                    start = event.getStart().getDate();
-                }
-
-                var end = event.getEnd().getDateTime();
-                if (end == null) {
-                    end = event.getStart().getDate();
-                }
-
-                System.out.printf("%s (%s) -> (%s)\n", event.getSummary(), start, end);
-            }
-        }
-    }
-
     public MovieWatchingCommand createMovieWatching(String creatorId, String[] attendees, Long startTime, String movieId) {
 
         var movie = movieRepository.findById(movieId).orElseThrow(ResourceNotFoundException::new);
@@ -111,8 +65,11 @@ public class CalendarService {
 
         for (String attendeeId : attendees) {
             var attendee = userRepository.findById(attendeeId).orElseThrow(ResourceNotFoundException::new);
+
+            if (!creator.getFriends().contains(attendee)) throw new BadRequestException();
+
             if (fetchedAttendees.contains(attendee)) throw new BadRequestException();
-            else fetchedAttendees.add(attendee);
+            else if (!attendeeId.equals(creatorId)) fetchedAttendees.add(attendee);
         }
 
         long playTime;
@@ -159,11 +116,15 @@ public class CalendarService {
                     .setApplicationName("Test")
                     .build();
             try {
-                calendar.events().insert("primary", event);
+                calendar.events().insert("primary", event).execute();
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new InternalServerErrorException();
             }
+        }
+
+        for (User attendee : fetchedAttendees) {
+            emailAsyncService.sendMovieWatchingInfo(attendee.getEmail(), movieId);
         }
 
         return MovieWatchingCommand.builder()
@@ -188,11 +149,13 @@ public class CalendarService {
                     .setQ("etag=movie_nights")
                     .execute().getItems().stream()
                     .map(event -> {
-                        var movie = movieRepository.findByTitle(event.getSummary()).get();
+                        var movie = movieRepository.findByTitle(event.getSummary())
+                                .orElseThrow(InternalServerErrorException::new);
                         return MovieWatchingCommand.builder()
                                 .movieId(movie.getImdbID())
                                 .attendees(event.getAttendees().stream().map(eventAttendee -> {
-                                    var user = userRepository.findByEmail(eventAttendee.getEmail()).get();
+                                    var user = userRepository.findByEmail(eventAttendee.getEmail())
+                                            .orElseThrow(InternalServerErrorException::new);
                                     return user.getId();
                                 }).collect(Collectors.toList()))
                                 .startTime(event.getStart().getDateTime().getValue())
@@ -201,6 +164,73 @@ public class CalendarService {
         } catch (IOException e) {
             throw new InternalServerErrorException();
         }
+    }
+
+    public List<Long> getPossibleWatchingTimes(String[] attendees, Integer starTime, String movieId, int numberOfTimes) {
+        var movie = movieRepository.findById(movieId).orElseThrow(ResourceNotFoundException::new);
+
+        var fetchedAttendees = new ArrayList<User>();
+
+        for (String userId : attendees) {
+            fetchedAttendees.add(userRepository.findById(userId).orElseThrow(ResourceNotFoundException::new));
+        }
+
+        int moviePlayTime;
+
+        try {
+            moviePlayTime = Integer.parseInt(movie.getRuntime().toLowerCase().replace("min", "").trim());
+        } catch (Exception e) {
+            // if move do not include runtime info set movie play time to 2 hours
+            moviePlayTime = 60 * 2;
+        }
+
+        int startHour = starTime / 60;
+        int startMinute = starTime % 60;
+
+        int endTime = starTime + moviePlayTime;
+        if (endTime > 24 * 60) endTime -= 24 * 60;
+
+        int endHour = endTime / 60;
+        int endMinute = endTime % 60;
+
+        var possibleStartTime = LocalDateTime.now().withHour(startHour).withMinute(startMinute);
+        var possibleEndTime = LocalDateTime.now().withHour(endHour).withMinute(endMinute);
+
+        if (possibleEndTime.isBefore(possibleStartTime)) possibleEndTime = possibleEndTime.plus(1, ChronoUnit.DAYS);
+
+        if (possibleStartTime.isBefore(LocalDateTime.now())) {
+            possibleStartTime = possibleStartTime.plus(1, ChronoUnit.DAYS);
+            possibleEndTime = possibleEndTime.plus(1, ChronoUnit.DAYS);
+        }
+
+        var possiblePlayTimes = new ArrayList<Long>();
+
+        do {
+            int freeAttendees = 0;
+
+            for (User user : fetchedAttendees) {
+                try {
+                    var credentials = getCredentials(user.getRefreshToken());
+                    var calendar = new Calendar.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credentials)
+                            .setApplicationName("Test")
+                            .build();
+
+                    if (!calendar.events().list("primary")
+                            .setTimeMin(new DateTime(possibleStartTime.toEpochSecond(OffsetDateTime.now().getOffset())))
+                            .setTimeMax(new DateTime(possibleEndTime.toEpochSecond(OffsetDateTime.now().getOffset())))
+                            .setSingleEvents(true).execute().getItems().isEmpty()) {
+                        break;
+                    } else freeAttendees++;
+                } catch (Exception e) {
+                    throw new InternalServerErrorException();
+                }
+            }
+            if (freeAttendees == attendees.length)
+                possiblePlayTimes.add(possibleStartTime.toEpochSecond(OffsetDateTime.now().getOffset()));
+
+        } while (possiblePlayTimes.size() < numberOfTimes);
+
+        return possiblePlayTimes;
     }
 
 

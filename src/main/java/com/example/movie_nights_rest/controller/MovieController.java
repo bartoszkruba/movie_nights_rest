@@ -39,7 +39,6 @@ public class MovieController {
 
     @GetMapping("/single")
     @ApiOperation("Fetch movies. Available for registered users.")
-    @PreAuthorize("hasRole('" + Role.BASIC + "') or hasRole('" + Role.ADMIN + "')")
     @Secured({Role.ADMIN, Role.BASIC})
     public MovieResponseCommand fetchMovie(
             @ApiParam(value = "Movie title")

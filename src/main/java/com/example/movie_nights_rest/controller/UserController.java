@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 
 @RestController
@@ -37,22 +38,22 @@ public class UserController {
     @GetMapping("/me")
     @Secured({Role.BASIC, Role.ADMIN})
     @ApiOperation("Get information about your account. Available for registered users.")
-    public UserResponseCommand getCurrentUser(@ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal) {
+    public UserResponseCommand getCurrentUser(@ApiIgnore @CurrentUser UserPrincipal userPrincipal) {
         return userService.getById(userPrincipal.getId());
     }
 
     @GetMapping("/me/friend")
     @Secured({Role.BASIC, Role.ADMIN})
     @ApiOperation("Get all your friends. Available for registered users.")
-    public Iterable<UserResponseCommand> getUserFriends(@ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal) {
+    public Iterable<UserResponseCommand> getUserFriends(@ApiIgnore @CurrentUser UserPrincipal userPrincipal) {
         return userService.getUserFriends(userPrincipal.getEmail());
     }
 
     @DeleteMapping("/me/friend/{id}")
     @Secured({Role.BASIC, Role.ADMIN})
     @ApiOperation("Remove user from your friends. Available for registered users.")
-    public void removeFriends(
-            @ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal,
+    public void removeFriend(
+            @ApiIgnore @CurrentUser UserPrincipal userPrincipal,
             @ApiParam("Friend ID") @PathVariable String id) {
         userService.removeUserFromFriends(userPrincipal.getId(), id);
     }
@@ -69,7 +70,7 @@ public class UserController {
     @ApiOperation("Create friend request for a user. Available for registered users.")
     @ResponseStatus(HttpStatus.CREATED)
     public void createFriendRequest(
-            @ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal,
+            @ApiIgnore @CurrentUser UserPrincipal userPrincipal,
             @ApiParam("User email") @RequestParam String email) {
 
         friendRequestService.createFriendRequest(userPrincipal.getId(), email);
@@ -80,7 +81,7 @@ public class UserController {
     @ApiOperation("Accept friend request. Available for registered users.")
     @ResponseStatus(HttpStatus.CREATED)
     public void acceptFriendRequest(
-            @ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal,
+            @ApiIgnore @CurrentUser UserPrincipal userPrincipal,
             @ApiParam("Request id") @PathVariable String id
     ) {
         friendRequestService.acceptFriendRequest(userPrincipal.getId(), id);
@@ -90,7 +91,7 @@ public class UserController {
     @Secured({Role.BASIC, Role.ADMIN})
     @ApiOperation("Discard friend request. Available for registered users.")
     public void discardFriendReqeust(
-            @ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal,
+            @ApiIgnore @CurrentUser UserPrincipal userPrincipal,
             @ApiParam("Request id") @PathVariable String id) {
         friendRequestService.discardFriendRequest(userPrincipal.getId(), id);
     }
@@ -98,18 +99,14 @@ public class UserController {
     @GetMapping("/me/pendingFriendRequest")
     @Secured({Role.BASIC, Role.ADMIN})
     @ApiOperation("Get list of friend request waiting for acceptance. Available for registered users.")
-    public Iterable<FriendRequestCommand> getPendingFriendRequests(
-            @ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal) {
-
+    public Iterable<FriendRequestCommand> getPendingFriendRequests(@ApiIgnore @CurrentUser UserPrincipal userPrincipal) {
         return friendRequestService.getPendingFriendRequests(userPrincipal.getId());
     }
 
     @GetMapping("/me/createdFriendRequest")
     @Secured({Role.BASIC, Role.ADMIN})
     @ApiOperation("Get list of friend request created by you. Available for registered users.")
-    public Iterable<FriendRequestCommand> getCreatedFriendRequests(
-            @ApiParam(hidden = true) @CurrentUser UserPrincipal userPrincipal) {
-
+    public Iterable<FriendRequestCommand> getCreatedFriendRequests(@ApiIgnore @CurrentUser UserPrincipal userPrincipal) {
         return friendRequestService.getCreatedFriendRequests(userPrincipal.getId());
     }
 }
