@@ -174,6 +174,35 @@ public class CalendarService {
                 .build();
     }
 
+    public List<MovieWatchingCommand> getMovieWatchings(String refreshToken) {
+        var credentials = getCredentials(refreshToken);
+
+        var calendar = new Calendar.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credentials)
+                .setApplicationName("Test")
+                .build();
+
+        try {
+            return calendar.events().list("primary")
+                    .setTimeMin(new DateTime(System.currentTimeMillis()))
+                    .setSingleEvents(true)
+                    .setQ("etag=movie_nights")
+                    .execute().getItems().stream()
+                    .map(event -> {
+                        var movie = movieRepository.findByTitle(event.getSummary()).get();
+                        return MovieWatchingCommand.builder()
+                                .movieId(movie.getImdbID())
+                                .attendees(event.getAttendees().stream().map(eventAttendee -> {
+                                    var user = userRepository.findByEmail(eventAttendee.getEmail()).get();
+                                    return user.getId();
+                                }).collect(Collectors.toList()))
+                                .startTime(event.getStart().getDateTime().getValue())
+                                .endTime(event.getEnd().getDateTime().getValue()).build();
+                    }).collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new InternalServerErrorException();
+        }
+    }
+
 
     private List<Event> getAllEventsBetween(DateTime from, DateTime to, Credential credentials) {
         var calendar = new Calendar.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credentials)
