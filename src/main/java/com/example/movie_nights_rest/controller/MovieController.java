@@ -74,6 +74,7 @@ public class MovieController {
             @RequestParam(defaultValue = "1")
                     Integer page
     ){
+        System.out.println(title);
         return movieService.fetchMoviePage(title, type, year, page);
     }
 }

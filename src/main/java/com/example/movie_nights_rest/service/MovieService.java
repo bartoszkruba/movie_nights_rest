@@ -11,6 +11,7 @@ import com.example.movie_nights_rest.repository.MovieRepository;
 import com.example.movie_nights_rest.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -28,7 +29,8 @@ public class MovieService {
 
     public MovieResponseCommand fetchMovie(String id, String title, Type type, String year, String plot) {
 
-        if (id == null && title == null) throw new BadRequestException();
+        if (StringUtils.isEmpty(id) && StringUtils.isEmpty(title))
+            throw new BadRequestException("Must include movie title or ID.");
 
         if (id != null) {
             var local = movieRepository.findById(id);
@@ -52,7 +54,7 @@ public class MovieService {
 
     public MoviePageResponseCommand fetchMoviePage(String title, Type type, String year, Integer page) {
 
-        if (title == null) throw new BadRequestException();
+        if (StringUtils.isEmpty(title)) throw new BadRequestException("Must include movie title.");
 
         var uri = UriComponentsBuilder.newInstance()
                 .scheme("http").host("www.omdbapi.com")
