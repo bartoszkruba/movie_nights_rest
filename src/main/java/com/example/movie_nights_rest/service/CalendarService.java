@@ -66,10 +66,10 @@ public class CalendarService {
         for (String attendeeId : attendees) {
             var attendee = userRepository.findById(attendeeId).orElseThrow(ResourceNotFoundException::new);
 
-            if (!creator.getFriends().contains(attendee)) throw new BadRequestException();
+            if (!creator.getFriends().contains(attendee))
+                throw new BadRequestException("Attendee with ID " + attendee.getId() + " is not your friend.");
 
-            if (fetchedAttendees.contains(attendee)) throw new BadRequestException();
-            else if (!attendeeId.equals(creatorId)) fetchedAttendees.add(attendee);
+            if (!attendeeId.equals(creatorId) && !fetchedAttendees.contains(attendee)) fetchedAttendees.add(attendee);
         }
 
         long playTime;
@@ -87,13 +87,16 @@ public class CalendarService {
         var credentials = new ArrayList<Credential>();
 
         var creatorCredential = getCredentials(creator.getRefreshToken());
-        if (!getAllEventsBetween(start, end, creatorCredential).isEmpty()) throw new BadRequestException();
+        if (!getAllEventsBetween(start, end, creatorCredential).isEmpty())
+            throw new BadRequestException("You have already reserved some other event for this time");
+
         else credentials.add(creatorCredential);
 
         for (User attendee : fetchedAttendees) {
             var attendeeCredential = getCredentials(attendee.getRefreshToken());
 
-            if (!getAllEventsBetween(start, end, attendeeCredential).isEmpty()) throw new BadRequestException();
+            if (!getAllEventsBetween(start, end, attendeeCredential).isEmpty())
+                throw new BadRequestException("There is already some other event reserved for this time.");
             else credentials.add(attendeeCredential);
         }
 

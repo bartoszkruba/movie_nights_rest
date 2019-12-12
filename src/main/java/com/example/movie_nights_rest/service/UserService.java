@@ -3,14 +3,11 @@ package com.example.movie_nights_rest.service;
 import com.example.movie_nights_rest.command.user.UserResponseCommand;
 import com.example.movie_nights_rest.exception.NoContentException;
 import com.example.movie_nights_rest.exception.ResourceNotFoundException;
-import com.example.movie_nights_rest.model.AuthProvider;
-import com.example.movie_nights_rest.model.User;
 import com.example.movie_nights_rest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 

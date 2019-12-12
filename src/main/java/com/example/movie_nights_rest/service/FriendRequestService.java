@@ -31,14 +31,17 @@ public class FriendRequestService {
     public void createFriendRequest(String userId, String email) {
         var principal = userRepository.findById(userId).orElseThrow(ResourceNotFoundException::new);
 
-        if (principal.getEmail().equals(email)) throw new BadRequestException();
+        if (principal.getEmail().equals(email))
+            throw new BadRequestException("You cannot send friend request to yourself.");
 
-        var user = userRepository.findByEmail(email).orElseThrow(ResourceNotFoundException::new);
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User do not exist."));
 
-        if (principal.getFriends().contains(user)) throw new BadRequestException();
+        if (principal.getFriends().contains(user))
+            throw new BadRequestException("You are already friend with this user.");
 
         if (!friendRequestRepository.findBySenderIdAndReceiverId(principal.getId(), user.getId()).isEmpty())
-            throw new BadRequestException();
+            throw new BadRequestException("You have already send friend request for this user");
 
         var friendRequest = FriendRequest.builder().sender(principal).receiver(user).build();
 
