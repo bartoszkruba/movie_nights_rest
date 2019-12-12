@@ -1,6 +1,7 @@
 package com.example.movie_nights_rest.service;
 
 import com.example.movie_nights_rest.command.user.UserResponseCommand;
+import com.example.movie_nights_rest.exception.NoContentException;
 import com.example.movie_nights_rest.exception.ResourceNotFoundException;
 import com.example.movie_nights_rest.model.AuthProvider;
 import com.example.movie_nights_rest.model.User;
@@ -24,17 +25,8 @@ public class UserService {
         return userRepository.findAll().stream().map(UserResponseCommand::new).collect(Collectors.toList());
     }
 
-    public UserResponseCommand create(String email, String password, ArrayList<String> roles, AuthProvider authProvider) {
-        var user = User.builder()
-                .email(email)
-                .provider(authProvider)
-                .roles(roles).build();
-
-        return new UserResponseCommand(userRepository.save(user));
-    }
-
     public UserResponseCommand getById(String id) {
-        return userRepository.findById(id).map(UserResponseCommand::new).orElseThrow(ResourceNotFoundException::new);
+        return userRepository.findById(id).map(UserResponseCommand::new).orElseThrow(NoContentException::new);
     }
 
     public Iterable<UserResponseCommand> getUserFriends(String email) {

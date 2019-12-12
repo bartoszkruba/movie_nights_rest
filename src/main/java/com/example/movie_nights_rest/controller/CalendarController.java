@@ -42,9 +42,9 @@ public class CalendarController {
 
     @GetMapping("/me/movieWatching/possibleTimes")
     @Secured({Role.ADMIN, Role.BASIC})
-    @ApiOperation("Fetch possible times (epoch timestamp) for movie watching event of certain movie with certain users")
+    @ApiOperation("Fetch possible times (epoch timestamp) for movie watching event of certain movie with certain users." +
+            "Available for registered users")
     public Iterable<Long> getPossibleWatchingTimes(
-            @ApiIgnore @CurrentUser UserPrincipal userPrincipal,
             @ApiParam(value = "Wishing start time expressed in minutes after midnight", defaultValue = "0")
             @RequestParam
                     Integer startTime,

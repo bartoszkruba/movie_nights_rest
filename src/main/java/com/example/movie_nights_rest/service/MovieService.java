@@ -4,6 +4,7 @@ import com.example.movie_nights_rest.command.movie.MoviePageResponseCommand;
 import com.example.movie_nights_rest.command.movie.MovieResponseCommand;
 import com.example.movie_nights_rest.command.movie.OmdbMovieResponseCommand;
 import com.example.movie_nights_rest.command.movie.OmdbSearchPageCommand;
+import com.example.movie_nights_rest.exception.NoContentException;
 import com.example.movie_nights_rest.model.Type;
 import com.example.movie_nights_rest.exception.InternalServerErrorException;
 import com.example.movie_nights_rest.repository.MovieRepository;
@@ -32,10 +33,15 @@ public class MovieService {
         if (id != null) {
             var local = movieRepository.findById(id);
 
-            return local.map(movie -> new MovieResponseCommand(movie, plot))
+            var fetched = local.map(movie -> new MovieResponseCommand(movie, plot))
                     .orElseGet(() -> fetchFromOMDB(id, title, type, year, plot));
+
+            if (fetched == null) throw new NoContentException();
+            else return fetched;
         } else {
-            return fetchFromOMDB(id, title, type, year, plot);
+            var fetched = fetchFromOMDB(id, title, type, year, plot);
+            if (fetched == null) throw new NoContentException();
+            else return fetched;
         }
 
     }
@@ -92,7 +98,6 @@ public class MovieService {
         uri.buildAndExpand();
 
         var movie = new RestTemplate().getForEntity(uri.toUriString(), OmdbMovieResponseCommand.class).getBody();
-
         if (movie == null) return null;
         movieAsyncService.saveMovieIfNotExist(id);
 

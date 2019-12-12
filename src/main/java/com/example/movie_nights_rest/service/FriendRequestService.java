@@ -47,7 +47,7 @@ public class FriendRequestService {
 
     public void acceptFriendRequest(String userId, String requestId) {
         var request = friendRequestRepository.findById(requestId).orElseThrow(ResourceNotFoundException::new);
-        if (!request.getReceiver().getId().equals(userId)) throw new UnauthorizedException();
+        if (!request.getReceiver().getId().equals(userId)) throw new ResourceNotFoundException();
 
         friendRequestRepository.delete(request);
 
@@ -66,7 +66,7 @@ public class FriendRequestService {
 
         if (!request.getReceiver().getId().equals(userId)
                 && !request.getSender().getId().equals(userId))
-            throw new UnauthorizedException();
+            throw new ResourceNotFoundException();
 
         friendRequestRepository.delete(request);
     }
