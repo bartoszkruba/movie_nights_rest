@@ -53,14 +53,13 @@ public class MovieService {
     }
 
     public MoviePageResponseCommand fetchMoviePage(String title, Type type, String year, Integer page) {
-
         if (StringUtils.isEmpty(title)) throw new BadRequestException("Must include movie title.");
 
         var uri = UriComponentsBuilder.newInstance()
                 .scheme("http").host("www.omdbapi.com")
                 .path("/")
                 .queryParam("apikey", API_KEY);
-        if (title != null) uri.queryParam("s", URLDecoder.decode(title));
+        uri.queryParam("s", URLDecoder.decode(title));
         if (type != null) uri.queryParam("type", type.toString());
         if (year != null) uri.queryParam("y", year);
         if (page != null) uri.queryParam("page", page);

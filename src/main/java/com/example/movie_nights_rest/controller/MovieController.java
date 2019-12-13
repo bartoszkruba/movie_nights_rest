@@ -10,10 +10,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URISyntaxException;
 
 @RestController
 @RequestMapping("/api/movie")
@@ -61,7 +59,7 @@ public class MovieController {
     @ApiOperation("Fetch movie page. Available for registered users.")
     @Secured({Role.ADMIN, Role.BASIC})
     public MoviePageResponseCommand fetchMovies(
-            @ApiParam(value = "Move title")
+            @ApiParam(value = "Move title", required = true)
             @RequestParam(required = false)
                     String title,
             @ApiParam(value = "Type of result to return (movie, series or episode)", defaultValue = "movie")
@@ -74,7 +72,6 @@ public class MovieController {
             @RequestParam(defaultValue = "1")
                     Integer page
     ){
-        System.out.println(title);
         return movieService.fetchMoviePage(title, type, year, page);
     }
 }

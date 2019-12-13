@@ -45,7 +45,8 @@ public class Movie {
         this.production = movie.getProduction();
         this.website = movie.getWebsite();
         this.smallPoster = movie.getPoster();
-        this.bigPoster = movie.getPoster().replace("X300.jpg", ".jpg");
+        if (movie.getPoster() != null)
+            this.bigPoster = movie.getPoster().replace("X300.jpg", ".jpg");
     }
 
     private String title;

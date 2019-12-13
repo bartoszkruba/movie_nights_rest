@@ -46,7 +46,9 @@ public class MovieResponseCommand {
         this.website = movie.getWebsite();
 
         this.smallPoster = movie.getPoster();
-        this.bigPoster = movie.getPoster().replace("X300.jpg", ".jpg");
+
+        if (movie.getPoster() != null)
+            this.bigPoster = movie.getPoster().replace("X300.jpg", ".jpg");
     }
 
     public MovieResponseCommand(Movie movie, String plot) {
