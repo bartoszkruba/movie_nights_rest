@@ -114,16 +114,15 @@ public class CalendarService {
 
         event.setAttendees(eventAttendees);
 
-        for (Credential credential : credentials) {
-            var calendar = new Calendar.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credential)
-                    .setApplicationName("Test")
-                    .build();
-            try {
-                calendar.events().insert("primary", event).execute();
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new InternalServerErrorException();
-            }
+        var calendar = new Calendar.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(),
+                credentials.get(0))
+                .setApplicationName("Test")
+                .build();
+        try {
+            calendar.events().insert("primary", event).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new InternalServerErrorException();
         }
 
         for (User attendee : fetchedAttendees) {
