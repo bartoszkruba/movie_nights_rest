@@ -18,6 +18,7 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.FreeBusyRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -217,8 +218,8 @@ public class CalendarService {
                             .build();
 
                     if (!calendar.events().list("primary")
-                            .setTimeMin(new DateTime(possibleStartTime.toEpochSecond(OffsetDateTime.now().getOffset())))
-                            .setTimeMax(new DateTime(possibleEndTime.toEpochSecond(OffsetDateTime.now().getOffset())))
+                            .setTimeMin(new DateTime(possibleStartTime.toEpochSecond(OffsetDateTime.now().getOffset()) * 1000))
+                            .setTimeMax(new DateTime(possibleEndTime.toEpochSecond(OffsetDateTime.now().getOffset()) * 1000))
                             .setSingleEvents(true).execute().getItems().isEmpty()) {
                         break;
                     } else freeAttendees++;
@@ -226,11 +227,12 @@ public class CalendarService {
                     throw new InternalServerErrorException();
                 }
             }
+
+            if (freeAttendees == attendees.length) {
+                possiblePlayTimes.add(possibleStartTime.toEpochSecond(OffsetDateTime.now().getOffset()));
+            }
             possibleStartTime = possibleStartTime.plusDays(1);
             possibleEndTime = possibleEndTime.plusDays(1);
-
-            if (freeAttendees == attendees.length)
-                possiblePlayTimes.add(possibleStartTime.toEpochSecond(OffsetDateTime.now().getOffset()));
 
         } while (possiblePlayTimes.size() < numberOfTimes);
 
