@@ -16,7 +16,7 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ApiModel("User response")
+@ApiModel("User")
 public class UserResponseCommand {
 
     @ApiModelProperty("User ID")

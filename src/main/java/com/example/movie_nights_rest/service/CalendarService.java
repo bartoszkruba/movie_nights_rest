@@ -214,7 +214,8 @@ public class CalendarService {
             for (User user : fetchedAttendees) {
                 try {
                     var credentials = getCredentials(user.getRefreshToken());
-                    var calendar = new Calendar.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credentials)
+                    var calendar = new Calendar.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(),
+                            credentials)
                             .setApplicationName("Test")
                             .build();
 
@@ -228,6 +229,9 @@ public class CalendarService {
                     throw new InternalServerErrorException();
                 }
             }
+            possibleStartTime = possibleStartTime.plusDays(1);
+            possibleEndTime = possibleEndTime.plusDays(1);
+
             if (freeAttendees == attendees.length)
                 possiblePlayTimes.add(possibleStartTime.toEpochSecond(OffsetDateTime.now().getOffset()));
 
