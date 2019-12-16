@@ -4,6 +4,7 @@ import com.example.movie_nights_rest.command.movieWatching.DayOfTheWeek;
 import com.example.movie_nights_rest.command.movieWatching.MovieWatchingCommand;
 import com.example.movie_nights_rest.exception.BadRequestException;
 import com.example.movie_nights_rest.exception.InternalServerErrorException;
+import com.example.movie_nights_rest.exception.NoContentException;
 import com.example.movie_nights_rest.exception.ResourceNotFoundException;
 import com.example.movie_nights_rest.model.User;
 import com.example.movie_nights_rest.repository.MovieRepository;
@@ -32,6 +33,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.jar.JarOutputStream;
 import java.util.stream.Collectors;
 
 @Service
@@ -170,17 +172,20 @@ public class CalendarService {
         }
     }
 
-    public List<Long> getPossibleWatchingTimes(String[] attendees, Integer starTime, String movieId, int numberOfTimes,
-                                               DayOfTheWeek[] weekdays) {
-        var movie = movieRepository.findById(movieId).orElseThrow(ResourceNotFoundException::new);
+    public List<Long> getPossibleWatchingTimes(String creatorId, String[] attendees, Integer starTime,
+                                               String movieId, int numberOfTimes, DayOfTheWeek[] weekdays) {
+
+        var movie = movieRepository.findById(movieId).orElseThrow(NoContentException::new);
 
         if (weekdays.length == 0) throw new BadRequestException("weekdays cannot be an empty list");
         var possibleWeekDays = Arrays.stream(weekdays).map(Enum::toString).collect(Collectors.toList());
 
         var fetchedAttendees = new ArrayList<User>();
 
+        fetchedAttendees.add(userRepository.findById(creatorId).orElseThrow(NoContentException::new));
+
         for (String userId : attendees) {
-            fetchedAttendees.add(userRepository.findById(userId).orElseThrow(ResourceNotFoundException::new));
+            fetchedAttendees.add(userRepository.findById(userId).orElseThrow(NoContentException::new));
         }
 
         int moviePlayTime;
@@ -204,7 +209,8 @@ public class CalendarService {
         var possibleStartTime = LocalDateTime.now().withHour(startHour).withMinute(startMinute);
         var possibleEndTime = LocalDateTime.now().withHour(endHour).withMinute(endMinute);
 
-        if (possibleEndTime.isBefore(possibleStartTime)) possibleEndTime = possibleEndTime.plus(1, ChronoUnit.DAYS);
+        if (possibleEndTime.isBefore(possibleStartTime)) possibleEndTime = possibleEndTime.plus(1,
+                ChronoUnit.DAYS);
 
         if (possibleStartTime.isBefore(LocalDateTime.now())) {
             possibleStartTime = possibleStartTime.plus(1, ChronoUnit.DAYS);
@@ -230,8 +236,10 @@ public class CalendarService {
                             .build();
 
                     if (!calendar.events().list("primary")
-                            .setTimeMin(new DateTime(possibleStartTime.toEpochSecond(OffsetDateTime.now().getOffset()) * 1000))
-                            .setTimeMax(new DateTime(possibleEndTime.toEpochSecond(OffsetDateTime.now().getOffset()) * 1000))
+                            .setTimeMin(new DateTime(possibleStartTime
+                                    .toEpochSecond(OffsetDateTime.now().getOffset()) * 1000))
+                            .setTimeMax(new DateTime(possibleEndTime
+                                    .toEpochSecond(OffsetDateTime.now().getOffset()) * 1000))
                             .setSingleEvents(true).execute().getItems().isEmpty()) {
                         break;
                     } else freeAttendees++;
@@ -240,7 +248,7 @@ public class CalendarService {
                 }
             }
 
-            if (freeAttendees == attendees.length) {
+            if (freeAttendees == fetchedAttendees.size()) {
                 possiblePlayTimes.add(possibleStartTime.toEpochSecond(OffsetDateTime.now().getOffset()));
             }
             possibleStartTime = possibleStartTime.plusDays(1);

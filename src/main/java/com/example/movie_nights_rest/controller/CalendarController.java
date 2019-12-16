@@ -46,6 +46,7 @@ public class CalendarController {
     @ApiOperation("Fetch possible times (epoch timestamp) for movie watching event of certain movie with certain users." +
             "Available for registered users")
     public Iterable<Long> getPossibleWatchingTimes(
+            @ApiIgnore @CurrentUser UserPrincipal userPrincipal,
             @ApiParam(value = "Wishing start time expressed in minutes after midnight", defaultValue = "0")
             @RequestParam
                     Integer startTime,
@@ -56,10 +57,12 @@ public class CalendarController {
             @ApiParam("IDs of users you wish to watch movie with")
             @RequestParam
                     String[] attendees,
-            @ApiParam("Which days of the week to include")
+            @ApiParam(value = "Which days of the week to include",
+                    defaultValue = "monday,tuesday,wednesday,thursday,friday,saturday,sunday")
             @RequestParam(defaultValue = "monday,tuesday,wednesday,thursday,friday,saturday,sunday")
                     DayOfTheWeek[] weekdays) {
-        return calendarService.getPossibleWatchingTimes(attendees, startTime, movieId, count, weekdays);
+        return calendarService.getPossibleWatchingTimes(userPrincipal.getId(), attendees, startTime, movieId, count,
+                weekdays);
     }
 
 }
