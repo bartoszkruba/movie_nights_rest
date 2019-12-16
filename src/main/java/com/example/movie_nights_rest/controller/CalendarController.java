@@ -1,6 +1,7 @@
 package com.example.movie_nights_rest.controller;
 
 import com.example.movie_nights_rest.annotation.CurrentUser;
+import com.example.movie_nights_rest.command.movieWatching.DayOfTheWeek;
 import com.example.movie_nights_rest.command.movieWatching.MovieWatchingCommand;
 import com.example.movie_nights_rest.config.security.UserPrincipal;
 import com.example.movie_nights_rest.model.Role;
@@ -54,8 +55,11 @@ public class CalendarController {
                     Integer count,
             @ApiParam("IDs of users you wish to watch movie with")
             @RequestParam
-                    String[] attendees) {
-        return calendarService.getPossibleWatchingTimes(attendees, startTime, movieId, count);
+                    String[] attendees,
+            @ApiParam("Which days of the week to include")
+            @RequestParam(defaultValue = "monday,tuesday,wednesday,thursday,friday,saturday,sunday")
+                    DayOfTheWeek[] weekdays) {
+        return calendarService.getPossibleWatchingTimes(attendees, startTime, movieId, count, weekdays);
     }
 
 }

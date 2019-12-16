@@ -1,5 +1,6 @@
 package com.example.movie_nights_rest.service;
 
+import com.example.movie_nights_rest.command.movieWatching.DayOfTheWeek;
 import com.example.movie_nights_rest.command.movieWatching.MovieWatchingCommand;
 import com.example.movie_nights_rest.exception.BadRequestException;
 import com.example.movie_nights_rest.exception.InternalServerErrorException;
@@ -24,10 +25,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -167,8 +170,12 @@ public class CalendarService {
         }
     }
 
-    public List<Long> getPossibleWatchingTimes(String[] attendees, Integer starTime, String movieId, int numberOfTimes) {
+    public List<Long> getPossibleWatchingTimes(String[] attendees, Integer starTime, String movieId, int numberOfTimes,
+                                               DayOfTheWeek[] weekdays) {
         var movie = movieRepository.findById(movieId).orElseThrow(ResourceNotFoundException::new);
+
+        if (weekdays.length == 0) throw new BadRequestException("weekdays cannot be an empty list");
+        var possibleWeekDays = Arrays.stream(weekdays).map(Enum::toString).collect(Collectors.toList());
 
         var fetchedAttendees = new ArrayList<User>();
 
@@ -204,6 +211,11 @@ public class CalendarService {
             possibleEndTime = possibleEndTime.plus(1, ChronoUnit.DAYS);
         }
 
+        while (!possibleWeekDays.contains(possibleStartTime.getDayOfWeek().toString().toLowerCase())) {
+            possibleStartTime = possibleStartTime.plusDays(1);
+            possibleEndTime = possibleEndTime.plusDays(1);
+        }
+
         var possiblePlayTimes = new ArrayList<Long>();
 
         do {
@@ -233,6 +245,11 @@ public class CalendarService {
             }
             possibleStartTime = possibleStartTime.plusDays(1);
             possibleEndTime = possibleEndTime.plusDays(1);
+
+            while (!possibleWeekDays.contains(possibleStartTime.getDayOfWeek().toString().toLowerCase())) {
+                possibleStartTime = possibleStartTime.plusDays(1);
+                possibleEndTime = possibleEndTime.plusDays(1);
+            }
 
         } while (possiblePlayTimes.size() < numberOfTimes);
 
