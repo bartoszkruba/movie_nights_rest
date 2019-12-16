@@ -104,8 +104,7 @@ public class CalendarService {
                 .setSummary(movie.getTitle())
                 .setDescription("Movie watching of " + movie.getTitle())
                 .setStart(new EventDateTime().setDateTime(start))
-                .setEnd(new EventDateTime().setDateTime(end))
-                .setEtag("movie_nights");
+                .setEnd(new EventDateTime().setDateTime(end));
 
         var eventAttendees = new ArrayList<EventAttendee>();
         for (User attendee : fetchedAttendees) {
@@ -119,7 +118,7 @@ public class CalendarService {
                 .setApplicationName("Test")
                 .build();
         try {
-            calendar.events().insert("primary", event).execute();
+            calendar.events().insert("primary", event).setSendNotifications(true).execute();
         } catch (IOException e) {
             e.printStackTrace();
             throw new InternalServerErrorException();
@@ -148,7 +147,6 @@ public class CalendarService {
             return calendar.events().list("primary")
                     .setTimeMin(new DateTime(System.currentTimeMillis()))
                     .setSingleEvents(true)
-                    .setQ("etag=movie_nights")
                     .execute().getItems().stream()
                     .map(event -> {
                         var movie = movieRepository.findByTitle(event.getSummary())
