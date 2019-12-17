@@ -20,7 +20,8 @@ public class SwaggerConfig {
                 .apiInfo(apiInfo())
                 .enable(true)
                 .select()
-                .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class)).build();
+                .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
+                .build();
     }
 
     private ApiInfo apiInfo() {

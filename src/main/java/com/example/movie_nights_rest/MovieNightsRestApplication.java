@@ -14,5 +14,4 @@ public class MovieNightsRestApplication {
     public static void main(String[] args) {
         SpringApplication.run(MovieNightsRestApplication.class, args);
     }
-
 }

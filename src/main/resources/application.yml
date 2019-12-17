@@ -22,6 +22,7 @@ server:
   error:
     include-stacktrace: never
 
+
 app:
   auth:
     tokenSecret: 926D96C90030DD58429D2751AC1BDBBC
@@ -33,3 +34,9 @@ app:
     # We're not using cookies because they won't work well in mobile clients.
     authorizedRedirectUris:
       - http://localhost:3000/oauth2/redirect
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health, metrics, httptrace
