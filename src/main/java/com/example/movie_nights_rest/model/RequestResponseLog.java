@@ -21,7 +21,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Log {
+public class RequestResponseLog {
     @Id
     private String id;
 
@@ -41,7 +41,7 @@ public class Log {
     private String requestRemoteAddress;
     private URI requestURI;
 
-    public Log(HttpTrace httpTrace) {
+    public RequestResponseLog(HttpTrace httpTrace) {
         this.principal = httpTrace.getPrincipal();
 
         this.request = new HashMap<>();
