@@ -10,6 +10,7 @@ import com.example.movie_nights_rest.exception.InternalServerErrorException;
 import com.example.movie_nights_rest.repository.MovieRepository;
 import com.example.movie_nights_rest.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -23,7 +24,8 @@ import java.net.URLDecoder;
 @RequiredArgsConstructor
 public class MovieService {
 
-    private final String API_KEY = "57c2e939";
+    @Value("${omdbkey}")
+    private String API_KEY;
     private final MovieRepository movieRepository;
     private final MovieAsyncService movieAsyncService;
 

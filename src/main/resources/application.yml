@@ -22,7 +22,7 @@ server:
   error:
     include-stacktrace: never
 
-
+omdbkey: 57c2e939
 app:
   auth:
     tokenSecret: 926D96C90030DD58429D2751AC1BDBBC
