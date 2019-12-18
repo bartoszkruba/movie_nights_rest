@@ -2,7 +2,8 @@ package com.example.movie_nights_rest.controller;
 
 import com.example.movie_nights_rest.annotation.CurrentUser;
 import com.example.movie_nights_rest.command.movieWatching.DayOfTheWeek;
-import com.example.movie_nights_rest.command.movieWatching.MovieWatchingCommand;
+import com.example.movie_nights_rest.command.movieWatching.MovieWatchingRequestCommand;
+import com.example.movie_nights_rest.command.movieWatching.MovieWatchingResponseCommand;
 import com.example.movie_nights_rest.config.security.UserPrincipal;
 import com.example.movie_nights_rest.model.Role;
 import com.example.movie_nights_rest.service.CalendarService;
@@ -26,18 +27,18 @@ public class CalendarController {
     @Secured({Role.ADMIN, Role.BASIC})
     @ApiOperation("Create new movie watching. Available for registered users.")
     @ResponseStatus(HttpStatus.CREATED)
-    public MovieWatchingCommand createMovieWatching(
+    public MovieWatchingResponseCommand createMovieWatching(
             @ApiIgnore @CurrentUser UserPrincipal userPrincipal,
-            @ApiParam("Users IDs. Have to be your friends.") @RequestParam String[] attendees,
-            @ApiParam("Epoch timestamp for event start") @RequestParam Long startTime,
-            @ApiParam("ID of the movie") @RequestParam String movieId) {
-        return calendarService.createMovieWatching(userPrincipal.getId(), attendees, startTime, movieId);
+            @ApiParam("Event request.") @RequestBody MovieWatchingRequestCommand request) {
+
+        return calendarService.createMovieWatching(userPrincipal.getId(), request.getAttendees(), request.getStartTime(),
+                request.getMovieId(), request.getLocation());
     }
 
     @GetMapping("/me/movieWatching")
     @Secured({Role.ADMIN, Role.BASIC})
     @ApiOperation("Get your upcoming movie watching events. Available for registered users.")
-    public Iterable<MovieWatchingCommand> getMovieWatching(@ApiIgnore @CurrentUser UserPrincipal userPrincipal) {
+    public Iterable<MovieWatchingResponseCommand> getMovieWatching(@ApiIgnore @CurrentUser UserPrincipal userPrincipal) {
         return calendarService.getMovieWatchings(userPrincipal.getRefreshToken());
     }
 

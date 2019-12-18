@@ -1,7 +1,7 @@
 package com.example.movie_nights_rest.service;
 
 import com.example.movie_nights_rest.command.movieWatching.DayOfTheWeek;
-import com.example.movie_nights_rest.command.movieWatching.MovieWatchingCommand;
+import com.example.movie_nights_rest.command.movieWatching.MovieWatchingResponseCommand;
 import com.example.movie_nights_rest.exception.BadRequestException;
 import com.example.movie_nights_rest.exception.InternalServerErrorException;
 import com.example.movie_nights_rest.exception.NoContentException;
@@ -20,20 +20,17 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventAttendee;
 import com.google.api.services.calendar.model.EventDateTime;
-import com.google.api.services.calendar.model.FreeBusyRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.jar.JarOutputStream;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,7 +60,8 @@ public class CalendarService {
         }
     }
 
-    public MovieWatchingCommand createMovieWatching(String creatorId, String[] attendees, Long startTime, String movieId) {
+    public MovieWatchingResponseCommand createMovieWatching(String creatorId, ArrayList<String> attendees, Long startTime,
+                                                            String movieId, String location) {
 
         var movie = movieRepository.findById(movieId).orElseThrow(ResourceNotFoundException::new);
         var creator = userRepository.findById(creatorId).orElseThrow(ResourceNotFoundException::new);
@@ -110,7 +108,8 @@ public class CalendarService {
                 .setSummary(movie.getTitle())
                 .setDescription("Movie watching of " + movie.getTitle())
                 .setStart(new EventDateTime().setDateTime(start))
-                .setEnd(new EventDateTime().setDateTime(end));
+                .setEnd(new EventDateTime().setDateTime(end))
+                .setLocation(location);
 
         var eventAttendees = new ArrayList<EventAttendee>();
         for (User attendee : fetchedAttendees) {
@@ -134,7 +133,7 @@ public class CalendarService {
             emailAsyncService.sendMovieWatchingInfo(attendee.getEmail(), movieId);
         }
 
-        return MovieWatchingCommand.builder()
+        return MovieWatchingResponseCommand.builder()
                 .startTime(startTime)
                 .endTime(startTime + playTime * 60 * 1000)
                 .attendees(fetchedAttendees.stream().map(User::getId).collect(Collectors.toList()))
@@ -142,7 +141,7 @@ public class CalendarService {
                 .build();
     }
 
-    public List<MovieWatchingCommand> getMovieWatchings(String refreshToken) {
+    public List<MovieWatchingResponseCommand> getMovieWatchings(String refreshToken) {
         var credentials = getCredentials(refreshToken);
 
         var calendar = new Calendar.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credentials)
@@ -157,7 +156,7 @@ public class CalendarService {
                     .map(event -> {
                         var movie = movieRepository.findByTitle(event.getSummary())
                                 .orElseThrow(InternalServerErrorException::new);
-                        return MovieWatchingCommand.builder()
+                        return MovieWatchingResponseCommand.builder()
                                 .movieId(movie.getImdbID())
                                 .attendees(event.getAttendees().stream().map(eventAttendee -> {
                                     var user = userRepository.findByEmail(eventAttendee.getEmail())
