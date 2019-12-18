@@ -1,5 +1,6 @@
 package com.example.movie_nights_rest.config.security;
 
+import com.example.movie_nights_rest.exception.ResourceNotFoundException;
 import com.example.movie_nights_rest.model.User;
 import com.example.movie_nights_rest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public UserDetails loadUserById(String id) {
-        User user = userRepository.findById(id).orElseThrow(RuntimeException::new);
+        User user = userRepository.findById(id).orElseThrow(ResourceNotFoundException::new);
 
         return UserPrincipal.create(user);
     }

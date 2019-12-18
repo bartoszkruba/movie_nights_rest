@@ -35,8 +35,8 @@ app:
     authorizedRedirectUris:
       - http://localhost:3000/oauth2/redirect
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: info, health, metrics, httptrace
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: info, health, metrics, httptrace
