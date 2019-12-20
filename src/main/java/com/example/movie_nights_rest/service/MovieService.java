@@ -11,6 +11,7 @@ import com.example.movie_nights_rest.repository.MovieRepository;
 import com.example.movie_nights_rest.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -29,6 +30,7 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final MovieAsyncService movieAsyncService;
 
+    @Cacheable("movies")
     public MovieResponseCommand fetchMovie(String id, String title, Type type, String year, String plot) {
 
         if (StringUtils.isEmpty(id) && StringUtils.isEmpty(title))
@@ -54,6 +56,7 @@ public class MovieService {
         return fetchMovie(id, null, null, null, "short");
     }
 
+    @Cacheable("moviePages")
     public MoviePageResponseCommand fetchMoviePage(String title, Type type, String year, Integer page) {
         if (StringUtils.isEmpty(title)) throw new BadRequestException("Must include movie title.");
 
